@@ -1,0 +1,29 @@
+name: Create or Update Pull Request
+description: "A GitHub Action to create or update a pull request based on local changes"
+inputs:
+  title:
+    description: "Pull Request title"
+    required: true
+    default: "Update from 'Create or Update Request' action"
+  body:
+    description: "Pull Request body"
+    required: true
+    default: |
+      This pull request has been created by the ["Create or Update Pull Request" action](https://github.com/gr2m/create-or-update-pull-request-action#readme). 
+
+      You can set a custom pull request title, body, branch and commit messages, see [Usage](https://github.com/gr2m/create-or-update-pull-request-action#usage).
+  branch:
+    description: "Branch name"
+    required: true
+    default: create-or-update-pull-request-action
+  commit-message:
+    description: Commit message
+    required: true
+    default: Update from 'Create or Update Request' action
+  author:
+    description: Commit author name & email address. Must be in the form "Name <email@domain.com>"
+    required: true
+    default: "Create or Update Pull Request Action <create-or-update-pull-request@users.noreply.github.com>"
+runs:
+  using: "node12"
+  main: "dist/index.js"
