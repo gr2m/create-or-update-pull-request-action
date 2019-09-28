@@ -1,5 +1,3 @@
-# 🚧 THIS IS WORK IN PROGRESS [#1](https://github.com/gr2m/create-or-update-pull-request-action)
-
 # Create or Update Pull Request with local changes
 
 > A GitHub Action to create or update a pull request based on local changes
