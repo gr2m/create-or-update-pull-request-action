@@ -1,0 +1,28 @@
+{
+  "name": "create-or-update-pull-request-action",
+  "version": "1.0.0",
+  "description": "A GitHub Action to create or update a pull request based on local changes",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build index.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gr2m/create-or-update-pull-request-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gr2m/create-or-update-pull-request-action/issues"
+  },
+  "homepage": "https://github.com/gr2m/create-or-update-pull-request-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@octokit/request": "^5.1.0",
+    "execa": "^2.0.4"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5"
+  }
+}
