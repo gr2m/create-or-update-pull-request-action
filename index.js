@@ -89,6 +89,11 @@ async function main() {
       { shell: true }
     );
 
+    console.log(`pushStdOut`);
+    console.log(pushStdOut);
+    console.log(`pushStdErr`);
+    console.log(pushStdErr);
+
     // no idea why the `git push` output goes into stderr. Checking in both just in case.
     if (remoteBranchExists) {
       core.info(`Existing pull request for "${inputs.branch}" updated`);

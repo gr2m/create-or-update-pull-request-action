@@ -32,7 +32,7 @@ jobs:
           title: Test pull request
           body: This pull request is part of the CI  - please ignore.
           branch: existing-branch
-          commit-message: "Just testing"
+          commit-message: "Just testing [skip ci]"
           author: "J. Doe <j@example.com>"
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :existing-branch"
         env:
