@@ -1,0 +1,13 @@
+on: [push]
+name: Test
+jobs:
+  happyPath:
+    name: Happy path
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - run: "date > test.txt" # create or update a test.txt file
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
