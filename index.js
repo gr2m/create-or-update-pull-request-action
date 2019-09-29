@@ -161,13 +161,13 @@ async function setGitUser({ name, email }) {
 
 async function checkOutRemoteBranch(branch) {
   try {
-    await command(
-      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
-      { shell: true }
-    );
-    await command(`git checkout ${branch}`, { shell: true });
-
     try {
+      await command(
+        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
+        { shell: true }
+      );
+      await command(`git checkout ${branch}`, { shell: true });
+
       const { stdout, stderr } = await command(`git pull`, { shell: true });
       console.log(`stdout`);
       console.log(stdout);
