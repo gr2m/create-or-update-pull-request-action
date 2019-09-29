@@ -166,11 +166,17 @@ async function checkOutRemoteBranch(branch) {
       { shell: true }
     );
     await command(`git checkout ${branch}`, { shell: true });
-    const { stdout, stderr } = await command(`git pull`, { shell: true });
-    console.log(`stdout`);
-    console.log(stdout);
-    console.log(`stderr`);
-    console.log(stderr);
+
+    try {
+      const { stdout, stderr } = await command(`git pull`, { shell: true });
+      console.log(`stdout`);
+      console.log(stdout);
+      console.log(`stderr`);
+      console.log(stderr);
+    } catch (error) {
+      console.log(`error`);
+      console.log(error);
+    }
 
     return true;
   } catch (error) {
