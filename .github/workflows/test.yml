@@ -1,13 +1,37 @@
 on: [push]
 name: Test
 jobs:
+  # use no configuration. Will update existing pull request:
+  # https://github.com/gr2m/create-or-update-pull-request-action/pull/2
   happyPath:
-    name: Happy path
+    name: Update existing pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - run: "date > test.txt" # create or update a test.txt file
+      - run: "date > test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTIONS_STEP_DEBUG: true
+
+  createNewPullRequest:
+    name: Create new pull request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - run: "date > test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Test pull request
+          body: This pull request is part of the CI  - please ignore.
+          branch: existing-branch
+          commit-message: "Just testing"
+          author: "J. Doe <j@example.com>"
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :existing-branch"
