@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@master
       - run: "date > test.txt" # create or update a test.txt file
       - uses: gr2m/create-or-update-pull-request-action@master
-        with:
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
@@ -27,7 +27,7 @@ Customizations
 
 ```yml
 uses: gr2m/create-or-update-pull-request-action@master
-with:
+env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
   title: "My pull request title"
