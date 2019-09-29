@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - run: "date > test.txt" # create or update a test.txt file
-      - uses: gr2m/create-or-update-pull-request-action@master
+      - uses: gr2m/create-or-update-pull-request-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -26,7 +26,7 @@ jobs:
 Customizations
 
 ```yml
-uses: gr2m/create-or-update-pull-request-action@master
+uses: gr2m/create-or-update-pull-request-action@v1
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
@@ -48,11 +48,11 @@ If there are none, the action concludes with the "neutral" status
 
 If there are changes, it does the following
 
-1. Set `user.name` and `user.email` with `git config --global` based on the `author` input, unless it has been already set before.
-2. It looks for local changes with `git status`.
-3. If there are uncommited changes, it adds a new commit using the `commit-message` input.
-4. It pushes the local changes to remote using the branch configured in the `branch` input.
-5. It creates a pull request using the `title` and `body` inputs.
+1. Sets `user.name` and `user.email` with `git config --global` based on the `author` input, unless it has been already set before.
+2. Looks for local changes with `git status`.
+3. Adds a new commit using the `commit-message` input if there are uncommited changes.
+4. Pushes the local changes to remote using the branch configured in the `branch` input.
+5. Creates a pull request using the `title` and `body` inputs, or updates an existing pull request.
 
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
 
