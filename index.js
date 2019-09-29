@@ -85,7 +85,7 @@ async function main() {
 
     core.debug(`Pushing local changes`);
     const { stdout: pushStdOut, stderr: pushStdErr } = await command(
-      `git push https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
+      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
@@ -168,12 +168,7 @@ async function checkOutRemoteBranch(branch) {
     );
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
-    try {
-      await command(`git rebase -Xtheirs -`, { shell: true });
-    } catch (error) {
-      console.log(`error`);
-      console.log(error);
-    }
+    await command(`git rebase -Xtheirs -`, { shell: true });
     return true;
   } catch (error) {
     core.info(`Branch "${branch}" does not yet exist on remote.`);
