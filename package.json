@@ -23,6 +23,24 @@
     "execa": "^2.0.4"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5"
+    "@semantic-release/git": "^7.0.16",
+    "@zeit/ncc": "^0.20.5",
+    "semantic-release": "^15.13.24"
+  },
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "dist/index.js"
+          ],
+          "message": "build(release): compiled action for ${nextRelease.version}\n\n[skip ci]"
+        }
+      ],
+      "@semantic-release/github"
+    ]
   }
 }
