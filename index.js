@@ -43,6 +43,9 @@ async function main() {
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
+    core.debug(`Try to fetch and checkout remote branch`);
+    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
+
     const { hasChanges, hasUncommitedChanges } = await getLocalChanges();
 
     if (!hasChanges) {
@@ -80,16 +83,12 @@ async function main() {
       core.debug(`No uncommited changes found`);
     }
 
-    core.debug(`Try to fetch and checkout remote branch`);
-    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
-
     core.debug(`Pushing local changes`);
     const { stdout: pushStdOut, stderr: pushStdErr } = await command(
       `git push https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
-    // no idea why the `git push` output goes into stderr. Checking in both just in case.
     if (remoteBranchExists) {
       core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
@@ -168,18 +167,6 @@ async function checkOutRemoteBranch(branch) {
     );
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
-    try {
-      const { stderr, stdout } = await command(`git merge -`, { shell: true });
-      core.info(`Local changes merged into "${branch}".`);
-      console.log(`stderr`);
-      console.log(stderr);
-      console.log(`stdout`);
-      console.log(stdout);
-    } catch (error) {
-      console.log(`error`);
-      console.log(error);
-      core.error(`Error merging local changes into "${branch}".`);
-    }
     return true;
   } catch (error) {
     core.info(`Branch "${branch}" does not yet exist on remote.`);
