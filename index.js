@@ -169,7 +169,7 @@ async function checkOutRemoteBranch(branch) {
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
     try {
-      await command(`git checkout -Xtheirs -`, { shell: true });
+      await command(`git rebase -Xtheirs -`, { shell: true });
     } catch (error) {
       console.log(`error`);
       console.log(error);
