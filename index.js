@@ -170,7 +170,7 @@ async function checkOutRemoteBranch(branch) {
     core.info(`Remote branch "${branch}" checked out locally.`);
     try {
       const { stderr, stdout } = await command(
-        `git merge ${process.env.GITHUB_REF}`,
+        `git merge ${process.env.GITHUB_REF.substr("refs/heads/".length)}`,
         { shell: true }
       );
       core.info(`Local changes merged into "${branch}".`);
