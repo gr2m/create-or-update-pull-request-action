@@ -168,6 +168,8 @@ async function checkOutRemoteBranch(branch) {
     );
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
+    await command(`git merge -`, { shell: true });
+    core.info(`Local changes merged into "${branch}".`);
     return true;
   } catch (error) {
     core.info(`Branch "${branch}" does not yet exist on remote.`);
