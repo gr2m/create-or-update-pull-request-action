@@ -411,6 +411,9 @@ async function main() {
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
+    core.debug(`Try to fetch and checkout remote branch`);
+    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
+
     const { hasChanges, hasUncommitedChanges } = await getLocalChanges();
 
     if (!hasChanges) {
@@ -454,9 +457,8 @@ async function main() {
       { shell: true }
     );
 
-    // no idea why the `git push` output goes into stderr. Checking in both just in case.
-    if (!/\[new branch\]/.test(pushStdOut || pushStdErr)) {
-      core.info(`Updated existing pull request for "${inputs.branch}"`);
+    if (remoteBranchExists) {
+      core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
     }
 
@@ -523,6 +525,32 @@ async function setGitUser({ name, email }) {
 
   core.debug(`Configuring user.email as "${email}"`);
   await command(`git config --global user.email "${email}"`, { shell: true });
+}
+
+async function checkOutRemoteBranch(branch) {
+  try {
+    await command(
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
+      { shell: true }
+    );
+    await command(`git checkout ${branch}`, { shell: true });
+
+    try {
+      const { stdout, stderr } = await command(`git pull`, { shell: true });
+      console.log(`stdout`);
+      console.log(stdout);
+      console.log(`stderr`);
+      console.log(stderr);
+    } catch (error) {
+      console.log(`error`);
+      console.log(error);
+    }
+
+    return true;
+  } catch (error) {
+    core.info(`Branch "${branch}" does not yet exist on remote.`);
+    return false;
+  }
 }
 
 
