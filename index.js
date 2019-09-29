@@ -168,8 +168,21 @@ async function checkOutRemoteBranch(branch) {
     );
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
-    await command(`git merge -`, { shell: true });
-    core.info(`Local changes merged into "${branch}".`);
+    try {
+      const { stderr, stdout } = await command(
+        `git merge ${process.env.GITHUB_REF}`,
+        { shell: true }
+      );
+      core.info(`Local changes merged into "${branch}".`);
+      console.log(`stderr`);
+      console.log(stderr);
+      console.log(`stdout`);
+      console.log(stdout);
+    } catch (error) {
+      console.log(`error`);
+      console.log(error);
+      core.error(`Error merging local changes into "${branch}".`);
+    }
     return true;
   } catch (error) {
     core.info(`Branch "${branch}" does not yet exist on remote.`);
