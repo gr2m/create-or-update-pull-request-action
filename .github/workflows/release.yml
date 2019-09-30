@@ -13,6 +13,8 @@ jobs:
         with:
           node-version: "12.x"
       - run: npm ci
+      - run: echo $GITHUB_REF
+      - run: npm ls env-ci
       - run: node -p 'require("env-ci")()'
       - run: git checkout "${GITHUB_REF:11}"
       - run: node -p 'require("env-ci")()'
