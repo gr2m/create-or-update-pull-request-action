@@ -12,8 +12,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
+      - run: npm checkout master
       - run: npm ci
       - run: npm run build
-      - run: npx semantic-release --debug
+      - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
