@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-      - run: npm checkout master
+      - run: git checkout "${GITHUB_REF:11}"
       - run: npm ci
       - run: npm run build
       - run: npx semantic-release
