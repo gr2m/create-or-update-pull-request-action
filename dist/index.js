@@ -448,15 +448,18 @@ async function main() {
       core.debug(`No uncommited changes found`);
     }
 
+    core.debug(`Try to fetch and checkout remote branch`);
+    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
+
     core.debug(`Pushing local changes`);
     const { stdout: pushStdOut, stderr: pushStdErr } = await command(
-      `git push https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
+      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
     // no idea why the `git push` output goes into stderr. Checking in both just in case.
-    if (!/\[new branch\]/.test(pushStdOut || pushStdErr)) {
-      core.info(`Updated existing pull request for "${inputs.branch}"`);
+    if (remoteBranchExists) {
+      core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
     }
 
@@ -523,6 +526,22 @@ async function setGitUser({ name, email }) {
 
   core.debug(`Configuring user.email as "${email}"`);
   await command(`git config --global user.email "${email}"`, { shell: true });
+}
+
+async function checkOutRemoteBranch(branch) {
+  try {
+    await command(
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
+      { shell: true }
+    );
+    await command(`git checkout ${branch}`, { shell: true });
+    core.info(`Remote branch "${branch}" checked out locally.`);
+    await command(`git rebase -Xtheirs -`, { shell: true });
+    return true;
+  } catch (error) {
+    core.info(`Branch "${branch}" does not yet exist on remote.`);
+    return false;
+  }
 }
 
 
