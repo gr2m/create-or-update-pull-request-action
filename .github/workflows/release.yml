@@ -12,7 +12,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
+      - run: node -p 'require("env-ci")()'
       - run: git checkout "${GITHUB_REF:11}"
+      - run: node -p 'require("env-ci")()'
       - run: npm ci
       - run: npm run build
       - run: npx semantic-release
