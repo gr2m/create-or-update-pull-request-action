@@ -122,6 +122,7 @@ var eos = function(stream, opts, callback) {
 	var rs = stream._readableState;
 	var readable = opts.readable || (opts.readable !== false && stream.readable);
 	var writable = opts.writable || (opts.writable !== false && stream.writable);
+	var cancelled = false;
 
 	var onlegacyfinish = function() {
 		if (!stream.writable) onfinish();
@@ -146,8 +147,13 @@ var eos = function(stream, opts, callback) {
 	};
 
 	var onclose = function() {
-		if (stream.destroyed || (readable && !(rs && rs.ended))) return callback.call(stream, new Error('premature close'));
-		if (stream.destroyed || (writable && !(ws && ws.ended))) return callback.call(stream, new Error('premature close'));
+		process.nextTick(onclosenexttick);
+	};
+
+	var onclosenexttick = function() {
+		if (cancelled) return;
+		if (readable && !(rs && (rs.ended && !rs.destroyed))) return callback.call(stream, new Error('premature close'));
+		if (writable && !(ws && (ws.ended && !ws.destroyed))) return callback.call(stream, new Error('premature close'));
 	};
 
 	var onrequest = function() {
@@ -172,6 +178,7 @@ var eos = function(stream, opts, callback) {
 	stream.on('close', onclose);
 
 	return function() {
+		cancelled = true;
 		stream.removeListener('complete', onfinish);
 		stream.removeListener('abort', onclose);
 		stream.removeListener('request', onrequest);
@@ -356,6 +363,72 @@ function onceStrict (fn) {
 
 /***/ }),
 
+/***/ 79:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pump = __webpack_require__(453);
+const bufferStream = __webpack_require__(625);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		return Promise.reject(new Error('Expected a stream'));
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+
+	let stream;
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			if (error) { // A null check
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		stream = pump(inputStream, bufferStream(options), error => {
+			if (error) {
+				rejectPromise(error);
+				return;
+			}
+
+			resolve();
+		});
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
+
 /***/ 87:
 /***/ (function(module) {
 
@@ -448,15 +521,18 @@ async function main() {
       core.debug(`No uncommited changes found`);
     }
 
+    core.debug(`Try to fetch and checkout remote branch`);
+    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
+
     core.debug(`Pushing local changes`);
     const { stdout: pushStdOut, stderr: pushStdErr } = await command(
-      `git push https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
+      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
     // no idea why the `git push` output goes into stderr. Checking in both just in case.
-    if (!/\[new branch\]/.test(pushStdOut || pushStdErr)) {
-      core.info(`Updated existing pull request for "${inputs.branch}"`);
+    if (remoteBranchExists) {
+      core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
     }
 
@@ -525,6 +601,22 @@ async function setGitUser({ name, email }) {
   await command(`git config --global user.email "${email}"`, { shell: true });
 }
 
+async function checkOutRemoteBranch(branch) {
+  try {
+    await command(
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
+      { shell: true }
+    );
+    await command(`git checkout ${branch}`, { shell: true });
+    core.info(`Remote branch "${branch}" checked out locally.`);
+    await command(`git rebase -Xtheirs -`, { shell: true });
+    return true;
+  } catch (error) {
+    core.info(`Branch "${branch}" does not yet exist on remote.`);
+    return false;
+  }
+}
+
 
 /***/ }),
 
@@ -568,6 +660,59 @@ module.exports.default = macosRelease;
 
 /***/ }),
 
+/***/ 124:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const pathKey = __webpack_require__(565);
+
+const npmRunPath = options => {
+	options = {
+		cwd: process.cwd(),
+		path: process.env[pathKey()],
+		...options
+	};
+
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
+
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
+	}
+
+	// Ensure the running `node` binary is used
+	result.push(path.dirname(process.execPath));
+
+	return result.concat(options.path).join(path.delimiter);
+};
+
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
+
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
+	const path = pathKey({env});
+
+	options.path = env[path];
+	env[path] = module.exports(options);
+
+	return env;
+};
+
+
+/***/ }),
+
 /***/ 129:
 /***/ (function(module) {
 
@@ -590,25 +735,21 @@ class MaxBufferError extends Error {
 	}
 }
 
-async function getStream(inputStream, options) {
+function getStream(inputStream, options) {
 	if (!inputStream) {
 		return Promise.reject(new Error('Expected a stream'));
 	}
 
-	options = {
-		maxBuffer: Infinity,
-		...options
-	};
+	options = Object.assign({maxBuffer: Infinity}, options);
 
 	const {maxBuffer} = options;
 
 	let stream;
-	await new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const rejectPromise = error => {
 			if (error) { // A null check
 				error.bufferedData = stream.getBufferedValue();
 			}
-
 			reject(error);
 		};
 
@@ -626,16 +767,12 @@ async function getStream(inputStream, options) {
 				rejectPromise(new MaxBufferError());
 			}
 		});
-	});
-
-	return stream.getBufferedValue();
+	}).then(() => stream.getBufferedValue());
 }
 
 module.exports = getStream;
-// TODO: Remove this for the next major release
-module.exports.default = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
-module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
+module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
 module.exports.MaxBufferError = MaxBufferError;
 
 
@@ -2459,36 +2596,7 @@ function coerce (version) {
 
 /***/ }),
 
-/***/ 292:
-/***/ (function(module) {
-
-"use strict";
-
-
-var isStream = module.exports = function (stream) {
-	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
-};
-
-isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
-};
-
-isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
-};
-
-isStream.duplex = function (stream) {
-	return isStream.writable(stream) && isStream.readable(stream);
-};
-
-isStream.transform = function (stream) {
-	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
-};
-
-
-/***/ }),
-
-/***/ 323:
+/***/ 282:
 /***/ (function(module) {
 
 "use strict";
@@ -2521,6 +2629,60 @@ isStream.transform = stream =>
 	typeof stream._transformState === 'object';
 
 module.exports = isStream;
+
+
+/***/ }),
+
+/***/ 322:
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = async (
+	promise,
+	onFinally = (() => {})
+) => {
+	let value;
+	try {
+		value = await promise;
+	} catch (error) {
+		await onFinally();
+		throw error;
+	}
+
+	await onFinally();
+	return value;
+};
+
+
+/***/ }),
+
+/***/ 323:
+/***/ (function(module) {
+
+"use strict";
+
+
+var isStream = module.exports = function (stream) {
+	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
+};
+
+isStream.writable = function (stream) {
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
+};
+
+isStream.readable = function (stream) {
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
+};
+
+isStream.duplex = function (stream) {
+	return isStream.writable(stream) && isStream.readable(stream);
+};
+
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
+};
 
 
 /***/ }),
@@ -2953,53 +3115,6 @@ function readShebang(command) {
 }
 
 module.exports = readShebang;
-
-
-/***/ }),
-
-/***/ 406:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const path = __webpack_require__(622);
-const pathKey = __webpack_require__(39);
-
-module.exports = opts => {
-	opts = Object.assign({
-		cwd: process.cwd(),
-		path: process.env[pathKey()]
-	}, opts);
-
-	let prev;
-	let pth = path.resolve(opts.cwd);
-	const ret = [];
-
-	while (prev !== pth) {
-		ret.push(path.join(pth, 'node_modules/.bin'));
-		prev = pth;
-		pth = path.resolve(pth, '..');
-	}
-
-	// ensure the running `node` binary is used
-	ret.push(path.dirname(process.execPath));
-
-	return ret.concat(opts.path).join(path.delimiter);
-};
-
-module.exports.env = opts => {
-	opts = Object.assign({
-		env: process.env
-	}, opts);
-
-	const env = Object.assign({}, opts.env);
-	const path = pathKey({env});
-
-	opts.path = env[path];
-	env[path] = module.exports(opts);
-
-	return env;
-};
 
 
 /***/ }),
@@ -5281,8 +5396,8 @@ module.exports = windowsRelease;
 
 "use strict";
 
-const isStream = __webpack_require__(323);
-const getStream = __webpack_require__(145);
+const isStream = __webpack_require__(282);
+const getStream = __webpack_require__(79);
 const mergeStream = __webpack_require__(778);
 
 // `input` option
@@ -5485,6 +5600,30 @@ module.exports = makeError;
 
 /***/ }),
 
+/***/ 565:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
+
 /***/ 567:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5492,7 +5631,7 @@ module.exports = makeError;
 
 const os = __webpack_require__(87);
 const onExit = __webpack_require__(260);
-const pFinally = __webpack_require__(697);
+const pFinally = __webpack_require__(322);
 
 const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
 
@@ -5730,65 +5869,6 @@ module.exports = parse;
 
 /***/ }),
 
-/***/ 582:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const {PassThrough} = __webpack_require__(413);
-
-module.exports = options => {
-	options = Object.assign({}, options);
-
-	const {array} = options;
-	let {encoding} = options;
-	const buffer = encoding === 'buffer';
-	let objectMode = false;
-
-	if (array) {
-		objectMode = !(encoding || buffer);
-	} else {
-		encoding = encoding || 'utf8';
-	}
-
-	if (buffer) {
-		encoding = null;
-	}
-
-	let len = 0;
-	const ret = [];
-	const stream = new PassThrough({objectMode});
-
-	if (encoding) {
-		stream.setEncoding(encoding);
-	}
-
-	stream.on('data', chunk => {
-		ret.push(chunk);
-
-		if (objectMode) {
-			len = ret.length;
-		} else {
-			len += chunk.length;
-		}
-	});
-
-	stream.getBufferedValue = () => {
-		if (array) {
-			return ret;
-		}
-
-		return buffer ? Buffer.concat(ret, len) : ret.join('');
-	};
-
-	stream.getBufferedLength = () => len;
-
-	return stream;
-};
-
-
-/***/ }),
-
 /***/ 588:
 /***/ (function(module) {
 
@@ -5833,46 +5913,40 @@ module.exports = require("events");
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(682);
+const pathKey = __webpack_require__(39);
 
-const npmRunPath = options => {
-	options = {
+module.exports = opts => {
+	opts = Object.assign({
 		cwd: process.cwd(),
-		path: process.env[pathKey()],
-		...options
-	};
+		path: process.env[pathKey()]
+	}, opts);
 
-	let previous;
-	let cwdPath = path.resolve(options.cwd);
-	const result = [];
+	let prev;
+	let pth = path.resolve(opts.cwd);
+	const ret = [];
 
-	while (previous !== cwdPath) {
-		result.push(path.join(cwdPath, 'node_modules/.bin'));
-		previous = cwdPath;
-		cwdPath = path.resolve(cwdPath, '..');
+	while (prev !== pth) {
+		ret.push(path.join(pth, 'node_modules/.bin'));
+		prev = pth;
+		pth = path.resolve(pth, '..');
 	}
 
-	// Ensure the running `node` binary is used
-	result.push(path.dirname(process.execPath));
+	// ensure the running `node` binary is used
+	ret.push(path.dirname(process.execPath));
 
-	return result.concat(options.path).join(path.delimiter);
+	return ret.concat(opts.path).join(path.delimiter);
 };
 
-module.exports = npmRunPath;
-// TODO: Remove this for the next major release
-module.exports.default = npmRunPath;
+module.exports.env = opts => {
+	opts = Object.assign({
+		env: process.env
+	}, opts);
 
-module.exports.env = options => {
-	options = {
-		env: process.env,
-		...options
-	};
-
-	const env = {...options.env};
+	const env = Object.assign({}, opts.env);
 	const path = pathKey({env});
 
-	options.path = env[path];
-	env[path] = module.exports(options);
+	opts.path = env[path];
+	env[path] = module.exports(opts);
 
 	return env;
 };
@@ -5884,6 +5958,66 @@ module.exports.env = options => {
 /***/ (function(module) {
 
 module.exports = require("path");
+
+/***/ }),
+
+/***/ 625:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
 
 /***/ }),
 
@@ -5963,10 +6097,10 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(20);
 const stripEof = __webpack_require__(768);
-const npmRunPath = __webpack_require__(406);
-const isStream = __webpack_require__(292);
-const _getStream = __webpack_require__(760);
-const pFinally = __webpack_require__(928);
+const npmRunPath = __webpack_require__(621);
+const isStream = __webpack_require__(323);
+const _getStream = __webpack_require__(145);
+const pFinally = __webpack_require__(697);
 const onExit = __webpack_require__(260);
 const errname = __webpack_require__(418);
 const stdio = __webpack_require__(151);
@@ -6323,30 +6457,6 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 /***/ }),
 
-/***/ 682:
-/***/ (function(module) {
-
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
-
-
-/***/ }),
-
 /***/ 692:
 /***/ (function(__unusedmodule, exports) {
 
@@ -6436,21 +6546,19 @@ module.exports = isPlainObject;
 
 "use strict";
 
+module.exports = (promise, onFinally) => {
+	onFinally = onFinally || (() => {});
 
-module.exports = async (
-	promise,
-	onFinally = (() => {})
-) => {
-	let value;
-	try {
-		value = await promise;
-	} catch (error) {
-		await onFinally();
-		throw error;
-	}
-
-	await onFinally();
-	return value;
+	return promise.then(
+		val => new Promise(resolve => {
+			resolve(onFinally());
+		}).then(() => val),
+		err => new Promise(resolve => {
+			resolve(onFinally());
+		}).then(() => {
+			throw err;
+		})
+	);
 };
 
 
@@ -6800,64 +6908,6 @@ const request = withDefaults(endpoint.endpoint, {
 
 exports.request = request;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 760:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const pump = __webpack_require__(453);
-const bufferStream = __webpack_require__(582);
-
-class MaxBufferError extends Error {
-	constructor() {
-		super('maxBuffer exceeded');
-		this.name = 'MaxBufferError';
-	}
-}
-
-function getStream(inputStream, options) {
-	if (!inputStream) {
-		return Promise.reject(new Error('Expected a stream'));
-	}
-
-	options = Object.assign({maxBuffer: Infinity}, options);
-
-	const {maxBuffer} = options;
-
-	let stream;
-	return new Promise((resolve, reject) => {
-		const rejectPromise = error => {
-			if (error) { // A null check
-				error.bufferedData = stream.getBufferedValue();
-			}
-			reject(error);
-		};
-
-		stream = pump(inputStream, bufferStream(options), error => {
-			if (error) {
-				rejectPromise(error);
-				return;
-			}
-
-			resolve();
-		});
-
-		stream.on('data', () => {
-			if (stream.getBufferedLength() > maxBuffer) {
-				rejectPromise(new MaxBufferError());
-			}
-		});
-	}).then(() => stream.getBufferedValue());
-}
-
-module.exports = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
-module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
-module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
@@ -7333,29 +7383,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 928:
-/***/ (function(module) {
-
-"use strict";
-
-module.exports = (promise, onFinally) => {
-	onFinally = onFinally || (() => {});
-
-	return promise.then(
-		val => new Promise(resolve => {
-			resolve(onFinally());
-		}).then(() => val),
-		err => new Promise(resolve => {
-			resolve(onFinally());
-		}).then(() => {
-			throw err;
-		})
-	);
-};
-
-
-/***/ }),
-
 /***/ 948:
 /***/ (function(module) {
 
@@ -7384,7 +7411,7 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(20);
 const stripFinalNewline = __webpack_require__(588);
-const npmRunPath = __webpack_require__(621);
+const npmRunPath = __webpack_require__(124);
 const onetime = __webpack_require__(723);
 const makeError = __webpack_require__(535);
 const normalizeStdio = __webpack_require__(168);
@@ -7641,54 +7668,53 @@ module.exports.node = (scriptPath, args, options = {}) => {
 
 "use strict";
 
-const {PassThrough: PassThroughStream} = __webpack_require__(413);
+const {PassThrough} = __webpack_require__(413);
 
 module.exports = options => {
-	options = {...options};
+	options = Object.assign({}, options);
 
 	const {array} = options;
 	let {encoding} = options;
-	const isBuffer = encoding === 'buffer';
+	const buffer = encoding === 'buffer';
 	let objectMode = false;
 
 	if (array) {
-		objectMode = !(encoding || isBuffer);
+		objectMode = !(encoding || buffer);
 	} else {
 		encoding = encoding || 'utf8';
 	}
 
-	if (isBuffer) {
+	if (buffer) {
 		encoding = null;
 	}
 
-	const stream = new PassThroughStream({objectMode});
+	let len = 0;
+	const ret = [];
+	const stream = new PassThrough({objectMode});
 
 	if (encoding) {
 		stream.setEncoding(encoding);
 	}
 
-	let length = 0;
-	const chunks = [];
-
 	stream.on('data', chunk => {
-		chunks.push(chunk);
+		ret.push(chunk);
 
 		if (objectMode) {
-			length = chunks.length;
+			len = ret.length;
 		} else {
-			length += chunk.length;
+			len += chunk.length;
 		}
 	});
 
 	stream.getBufferedValue = () => {
 		if (array) {
-			return chunks;
+			return ret;
 		}
 
-		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+		return buffer ? Buffer.concat(ret, len) : ret.join('');
 	};
 
-	stream.getBufferedLength = () => length;
+	stream.getBufferedLength = () => len;
 
 	return stream;
 };
