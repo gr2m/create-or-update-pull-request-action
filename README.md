@@ -7,17 +7,18 @@
 Minimal workflow example
 
 ```yml
-name: Update REST API endpoint methods
+Name: Nightly update
 on:
-  repository_dispatch:
-    types: [octokit-routes-release]
+  schedule:
+    # https://crontab.guru/every-night-at-midnight
+    - cron: "0 0 * * *"
 
 jobs:
   update_routes:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - run: "date > test.txt" # create or update a test.txt file
+      - run: "date > datetime.txt" # create or update a test.txt file
       - uses: gr2m/create-or-update-pull-request-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
