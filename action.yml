@@ -1,5 +1,7 @@
 name: Create or Update Pull Request
 description: "A GitHub Action to create or update a pull request based on local changes"
+icon: "git-pull-request"
+color: purple
 inputs:
   title:
     description: "Pull Request title"
