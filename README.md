@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - run: "date > datetime.txt" # create or update a test.txt file
-      - uses: gr2m/create-or-update-pull-request-action@v1
+      - uses: gr2m/create-or-update-pull-request-action@v1.x
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -27,7 +27,7 @@ jobs:
 Customizations
 
 ```yml
-uses: gr2m/create-or-update-pull-request-action@v1
+uses: gr2m/create-or-update-pull-request-action@v1.x
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
