@@ -19,14 +19,16 @@ inputs:
     description: "Branch name"
     required: true
     default: create-or-update-pull-request-action
-  commit-message:
-    description: Commit message
-    required: true
-    default: Update from 'Create or Update Request' action
   author:
     description: Commit author name & email address. Must be in the form "Name <email@domain.com>"
     required: true
     default: "Create or Update Pull Request Action <create-or-update-pull-request@users.noreply.github.com>"
+  commit-message:
+    description: Commit message for all uncommited changes.
+    required: true
+    default: Update from 'Create or Update Request' action
+  path:
+    description: Commit selected files only by providing a path. It is used in `git add "<path>"`
 runs:
   using: "node12"
   main: "dist/index.js"
