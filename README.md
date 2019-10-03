@@ -38,6 +38,24 @@ with:
   author: "Lorem J. Ipsum <lorem@example.com>"
 ```
 
+You can optionally define one or multiple commits for specified paths. All other changes will be ignored in that case.
+
+```yml
+uses: gr2m/create-or-update-pull-request-action@v1.x
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+with:
+  title: "My pull request title"
+  body: "My pull request body"
+  branch: "my-pull-request-base-branch"
+  author: "Lorem J. Ipsum <lorem@example.com>"
+  commits:
+    - path: cache
+      message: "build: cache"
+    - path: data
+      message: "feat: data updated"
+```
+
 ## How it works
 
 The actions checks for local changes which can be
