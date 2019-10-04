@@ -478,6 +478,7 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch"),
+      path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author")
     };
@@ -511,10 +512,16 @@ async function main() {
         });
       }
 
-      core.debug(`Comitting local changes`);
-      await command("git add .", { shell: true });
+      if (inputs.path) {
+        core.debug(`Committing local changes matching "${inputs.path}"`);
+        await command(`git add "${inputs.path}"`, { shell: true });
+      } else {
+        core.debug(`Committing all local changes`);
+        await command("git add .", { shell: true });
+      }
+
       await command(
-        `git commit -a -m "${inputs.commitMessage}" --author "${inputs.author}"`,
+        `git commit -m "${inputs.commitMessage}" --author "${inputs.author}"`,
         { shell: true }
       );
     } else {
