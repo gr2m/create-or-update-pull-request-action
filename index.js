@@ -168,27 +168,11 @@ async function setGitUser({ name, email }) {
 
 async function checkOutRemoteBranch(branch) {
   try {
-    try {
-      // no idea why git command output goes into stderr
-      const { stdout, stderr } = await command(
-        `git rev-parse --abbrev-ref HEAD`,
-        {
-          shell: true
-        }
-      );
+    const { stdout } = await command(`git rev-parse --abbrev-ref HEAD`, {
+      shell: true
+    });
 
-      console.log(`stdout`);
-      console.log(stdout);
-
-      console.log(`stderr`);
-      console.log(stderr);
-    } catch (error) {
-      console.log(`error`);
-      console.log(error);
-      process.exit(1);
-    }
-
-    if (stderr === branch) {
+    if (stdout === branch) {
       core.info(`Already in "${branch}".`);
       return;
     }
