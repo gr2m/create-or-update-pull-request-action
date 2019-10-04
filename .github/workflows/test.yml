@@ -57,7 +57,7 @@ jobs:
           branch: test-create-new-pull-request-with-multiple-commits
           author: "J. Doe <j@example.com>"
           path: file1.txt
-          commit-message: "file 1 created"
+          commit-message: "file 1 created [skip ci]"
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
           branch: test-create-new-pull-request-with-multiple-commits
           author: "J. Doe <j@example.com>"
           path: file2.txt
-          commit-message: "file 2 created"
+          commit-message: "file 2 created [skip ci]"
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
