@@ -172,6 +172,9 @@ async function checkOutRemoteBranch(branch) {
       shell: true
     });
 
+    console.log(`stdout`);
+    console.log(stdout);
+
     if (stdout === branch) {
       core.info(`Already in "${branch}".`);
       return;
@@ -187,6 +190,9 @@ async function checkOutRemoteBranch(branch) {
     await command(`git rebase -Xtheirs -`, { shell: true });
     return true;
   } catch (error) {
+    console.log(`error`);
+    console.log(error);
+
     core.info(`Branch "${branch}" does not yet exist on remote.`);
     return false;
   }
