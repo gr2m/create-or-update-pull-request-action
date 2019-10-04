@@ -73,7 +73,7 @@ async function main() {
 
       if (inputs.path) {
         core.debug(`Committing local changes matching "${inputs.path}"`);
-        await command(`git add "${path}"`, { shell: true });
+        await command(`git add "${inputs.path}"`, { shell: true });
       } else {
         core.debug(`Committing all local changes`);
         await command("git add .", { shell: true });
