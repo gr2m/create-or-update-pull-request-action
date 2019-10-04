@@ -4,7 +4,7 @@ jobs:
   # use no configuration. Will update existing pull request:
   # https://github.com/gr2m/create-or-update-pull-request-action/pull/2
   happyPath:
-    name: [TEST] Update existing pull request
+    name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -17,7 +17,7 @@ jobs:
           ACTIONS_STEP_DEBUG: true
 
   createNewPullRequest:
-    name: [TEST] Create new pull request
+    name: "[TEST] Create new pull request"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   multipleCommits:
-    name: [TEST] Create multiple commits
+    name: "[TEST] Create multiple commits"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
