@@ -178,6 +178,12 @@ async function checkOutRemoteBranch(branch) {
       shell: true
     });
 
+    console.log(`stdout`);
+    console.log(stdout);
+
+    console.log(`stderr`);
+    console.log(stderr);
+
     if (stderr === branch) {
       core.info(`Already in "${branch}".`);
       return;

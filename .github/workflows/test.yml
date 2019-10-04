@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTIONS_STEP_DEBUG: true
         with:
-          title: Test pull request
+          title: Test pull request with multiple commits
           body: This pull request is part of the CI  - please ignore.
           branch: test-create-new-pull-request-with-multiple-commits
           author: "J. Doe <j@example.com>"
