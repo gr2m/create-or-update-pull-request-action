@@ -91,12 +91,11 @@ async function main() {
     const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
 
     core.debug(`Pushing local changes`);
-    const { stdout: pushStdOut, stderr: pushStdErr } = await command(
+    await command(
       `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
-    // no idea why the `git push` output goes into stderr. Checking in both just in case.
     if (remoteBranchExists) {
       core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
@@ -173,6 +172,17 @@ async function checkOutRemoteBranch(branch) {
       `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
       { shell: true }
     );
+
+    // no idea why git command output goes into stderr
+    const { stdout, stderr } = await command(`git symbolic-ref --short HEAD`, {
+      shell: true
+    });
+
+    if (stderr === branch) {
+      core.info(`Already in "${branch}".`);
+      return;
+    }
+
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
     await command(`git rebase -Xtheirs -`, { shell: true });
