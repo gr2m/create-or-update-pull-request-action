@@ -1,4 +1,4 @@
-# Create or Update Pull Request with local changes
+# Create or Update Pull Request action
 
 > A GitHub Action to create or update a pull request based on local changes
 
@@ -80,6 +80,13 @@ If there are changes, it does the following
 5. Creates a pull request using the `title` and `body` inputs. If a pull request exists for the branch, it's checkoud out locally, rebased with `-XTheirs` and pushed with `--force` to update the pull request with the new changes.
 
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
+
+## Who is using it
+
+- [@octokit/routes](https://github.com/octokit/routes/blob/master/.github/workflows/update.yml)
+- [@octokit/rest.js](https://github.com/octokit/rest.js/blob/master/.github/workflows/update-rest-endpoint-methods.yml)
+
+Please send a pull request to add yours :)
 
 ## Credit
 
