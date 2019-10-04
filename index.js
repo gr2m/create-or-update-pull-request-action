@@ -37,28 +37,12 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch"),
+      path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
-      commits: core.getInput("commits"),
       author: core.getInput("author")
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
-
-    if (commits.commits) {
-      const allCommitsValid =
-        Array.isArray(commits.commits) &&
-        commits.commits.every(
-          commit =>
-            typeof commit.path === "string" &&
-            typeof commit.message === "string"
-        );
-      if (!allCommitsValid) {
-        core.setFailed(
-          "`commit` input must be an array of objects, each object must have a path and a message key"
-        );
-        return;
-      }
-    }
 
     const { hasChanges, hasUncommitedChanges } = await getLocalChanges();
 
@@ -87,24 +71,18 @@ async function main() {
         });
       }
 
-      if (inputs.commits) {
-        core.debug(`Committing local changes using specific commits and paths`);
-        for (const { path, message } of inputs.commits) {
-          await command(`git add "${path}"`, { shell: true });
-          await command(
-            `git commit -m "${message}" --author "${inputs.author}"`,
-            { shell: true }
-          );
-        }
+      if (inputs.path) {
+        core.debug(`Committing local changes matching "${inputs.path}"`);
+        await command(`git add "${path}"`, { shell: true });
       } else {
         core.debug(`Committing all local changes`);
-
         await command("git add .", { shell: true });
-        await command(
-          `git commit -a -m "${inputs.commitMessage}" --author "${inputs.author}"`,
-          { shell: true }
-        );
       }
+
+      await command(
+        `git commit -m "${inputs.commitMessage}" --author "${inputs.author}"`,
+        { shell: true }
+      );
     } else {
       core.debug(`No uncommited changes found`);
     }
