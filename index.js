@@ -194,7 +194,7 @@ async function checkOutRemoteBranch(branch) {
     console.log(error);
 
     core.info(`Branch "${branch}" does not yet exist on remote.`);
-    await command(`git checkout ${branch}`, { shell: true });
+    await command(`git checkout -b ${branch}`, { shell: true });
     return false;
   }
 }
