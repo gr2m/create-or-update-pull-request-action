@@ -168,15 +168,19 @@ async function setGitUser({ name, email }) {
 
 async function checkOutRemoteBranch(branch) {
   try {
-    await command(
-      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
-      { shell: true }
-    );
-
-    // no idea why git command output goes into stderr
-    const { stdout, stderr } = await command(`git symbolic-ref --short HEAD`, {
-      shell: true
-    });
+    try {
+      // no idea why git command output goes into stderr
+      const { stdout, stderr } = await command(
+        `git symbolic-ref --short HEAD`,
+        {
+          shell: true
+        }
+      );
+    } catch (error) {
+      console.log(`error`);
+      console.log(error);
+      process.exit(1);
+    }
 
     console.log(`stdout`);
     console.log(stdout);
@@ -188,6 +192,11 @@ async function checkOutRemoteBranch(branch) {
       core.info(`Already in "${branch}".`);
       return;
     }
+
+    await command(
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
+      { shell: true }
+    );
 
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
