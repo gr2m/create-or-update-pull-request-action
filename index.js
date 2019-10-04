@@ -44,7 +44,9 @@ async function main() {
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
-    const { hasChanges, hasUncommitedChanges } = await getLocalChanges();
+    const { hasChanges, hasUncommitedChanges } = await getLocalChanges(
+      inputs.path
+    );
 
     if (!hasChanges) {
       core.info("No local changes");
@@ -121,8 +123,10 @@ async function main() {
   }
 }
 
-async function getLocalChanges() {
-  const { stdout } = await command("git status", { shell: true });
+async function getLocalChanges(path) {
+  const { stdout } = await command(`git status ${path || "*"}`, {
+    shell: true
+  });
 
   if (/Your branch is up to date/.test(stdout)) {
     return;
