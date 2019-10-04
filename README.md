@@ -34,26 +34,32 @@ with:
   title: "My pull request title"
   body: "My pull request body"
   branch: "my-pull-request-base-branch"
-  commit-message: "My commit message for uncommited changes"
+  path: "lib/"
+  commit-message: "My commit message for uncommited changes in lib/ folder"
   author: "Lorem J. Ipsum <lorem@example.com>"
 ```
 
-You can optionally define one or multiple commits for specified paths. All other changes will be ignored in that case.
+To create multiple commits for different paths, use the action multiple times
 
 ```yml
-uses: gr2m/create-or-update-pull-request-action@v1.x
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-with:
-  title: "My pull request title"
-  body: "My pull request body"
-  branch: "my-pull-request-base-branch"
-  author: "Lorem J. Ipsum <lorem@example.com>"
-  commits:
-    - path: cache
-      message: "build: cache"
-    - path: data
-      message: "feat: data updated"
+- uses: gr2m/create-or-update-pull-request-action@v1.x
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    title: "My pull request title"
+    body: "My pull request body"
+    branch: "my-pull-request-base-branch"
+    author: "Lorem J. Ipsum <lorem@example.com>"
+    path: "cache/"
+    commit-message: "build: cache"
+- uses: gr2m/create-or-update-pull-request-action@v1.x
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    branch: "my-pull-request-base-branch"
+    author: "Lorem J. Ipsum <lorem@example.com>"
+    path: "data/"
+    commit-message: "feat: data updated"
 ```
 
 ## How it works
