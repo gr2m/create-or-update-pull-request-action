@@ -34,7 +34,7 @@ jobs:
           branch: test-create-new-pull-request
           commit-message: "Just testing [skip ci]"
           author: "J. Doe <j@example.com>"
-      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :existing-branch"
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -80,6 +80,6 @@ jobs:
           author: "J. Doe <j@example.com>"
           path: does_not_exist.txt
           commit-message: "this should fail silently, not commit should be created"
-      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :existing-branch"
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-with-multiple-commits"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
