@@ -477,7 +477,7 @@ async function main() {
     const inputs = {
       title: core.getInput("title"),
       body: core.getInput("body"),
-      branch: core.getInput("branch"),
+      branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author")
