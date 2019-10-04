@@ -187,13 +187,14 @@ async function checkOutRemoteBranch(branch) {
 
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
-    await command(`git rebase -Xtheirs -`, { shell: true });
+    await command(`git rebase -Xtheirs --autostash -`, { shell: true });
     return true;
   } catch (error) {
     console.log(`error`);
     console.log(error);
 
     core.info(`Branch "${branch}" does not yet exist on remote.`);
+    await command(`git checkout ${branch}`, { shell: true });
     return false;
   }
 }
