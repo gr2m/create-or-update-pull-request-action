@@ -4,7 +4,7 @@ jobs:
   # use no configuration. Will update existing pull request:
   # https://github.com/gr2m/create-or-update-pull-request-action/pull/2
   happyPath:
-    name: Update existing pull request
+    name: [TEST] Update existing pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -17,7 +17,7 @@ jobs:
           ACTIONS_STEP_DEBUG: true
 
   createNewPullRequest:
-    name: Create new pull request
+    name: [TEST] Create new pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   multipleCommits:
-    name: Create new pull request
+    name: [TEST] Create multiple commits
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -56,13 +56,30 @@ jobs:
           body: This pull request is part of the CI  - please ignore.
           branch: test-create-new-pull-request-with-multiple-commits
           author: "J. Doe <j@example.com>"
-          commits:
-            - path: file1.txt
-              message: "file 1 created"
-            - path: file2.txt
-              message: "file 2 created"
-            - path: does-not-exist.txt
-              message: "Action should not fail when path does not match any uncommitted files"
+          path: file1.txt
+          commit-message: "file 1 created"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Test pull request
+          body: This pull request is part of the CI  - please ignore.
+          branch: test-create-new-pull-request-with-multiple-commits
+          author: "J. Doe <j@example.com>"
+          path: file2.txt
+          commit-message: "file 2 created"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Test pull request
+          body: This pull request is part of the CI  - please ignore.
+          branch: test-create-new-pull-request-with-multiple-commits
+          author: "J. Doe <j@example.com>"
+          path: does_not_exist.txt
+          commit-message: "this should fail silently, not commit should be created"
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :existing-branch"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
