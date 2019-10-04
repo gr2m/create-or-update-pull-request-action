@@ -478,6 +478,7 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch"),
+      path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author")
     };
@@ -511,10 +512,16 @@ async function main() {
         });
       }
 
-      core.debug(`Comitting local changes`);
-      await command("git add .", { shell: true });
+      if (inputs.path) {
+        core.debug(`Committing local changes matching "${inputs.path}"`);
+        await command(`git add "${inputs.path}"`, { shell: true });
+      } else {
+        core.debug(`Committing all local changes`);
+        await command("git add .", { shell: true });
+      }
+
       await command(
-        `git commit -a -m "${inputs.commitMessage}" --author "${inputs.author}"`,
+        `git commit -m "${inputs.commitMessage}" --author "${inputs.author}"`,
         { shell: true }
       );
     } else {
@@ -525,12 +532,11 @@ async function main() {
     const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
 
     core.debug(`Pushing local changes`);
-    const { stdout: pushStdOut, stderr: pushStdErr } = await command(
+    await command(
       `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`,
       { shell: true }
     );
 
-    // no idea why the `git push` output goes into stderr. Checking in both just in case.
     if (remoteBranchExists) {
       core.info(`Existing pull request for "${inputs.branch}" updated`);
       return;
@@ -603,10 +609,36 @@ async function setGitUser({ name, email }) {
 
 async function checkOutRemoteBranch(branch) {
   try {
+    try {
+      // no idea why git command output goes into stderr
+      const { stdout, stderr } = await command(
+        `git rev-parse --abbrev-ref HEAD`,
+        {
+          shell: true
+        }
+      );
+
+      console.log(`stdout`);
+      console.log(stdout);
+
+      console.log(`stderr`);
+      console.log(stderr);
+    } catch (error) {
+      console.log(`error`);
+      console.log(error);
+      process.exit(1);
+    }
+
+    if (stderr === branch) {
+      core.info(`Already in "${branch}".`);
+      return;
+    }
+
     await command(
       `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
       { shell: true }
     );
+
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
     await command(`git rebase -Xtheirs -`, { shell: true });
