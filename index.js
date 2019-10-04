@@ -171,7 +171,7 @@ async function checkOutRemoteBranch(branch) {
     try {
       // no idea why git command output goes into stderr
       const { stdout, stderr } = await command(
-        `git symbolic-ref --short HEAD`,
+        `git rev-parse --abbrev-ref HEAD`,
         {
           shell: true
         }
