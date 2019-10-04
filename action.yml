@@ -27,8 +27,8 @@ inputs:
     description: Commit message for all uncommited changes.
     required: true
     default: Update from 'Create or Update Request' action
-  commits:
-    description: Array of objects with `path` and `message` keys to commit changes selectively
+  path:
+    description: Commit selected files only by providing a path. It is used in `git add "<path>"`
 runs:
   using: "node12"
   main: "dist/index.js"
