@@ -5,9 +5,7 @@ const { command } = require("execa");
 const core = require("@actions/core");
 const { request } = require("@octokit/request");
 
-const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
-  .toString(36)
-  .substr(2)}`;
+const TEMPORARY_BRANCH_NAME = "tmp-create-or-update-pull-request-action";
 
 main();
 
