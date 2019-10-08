@@ -62,6 +62,10 @@ To create multiple commits for different paths, use the action multiple times
     commit-message: "feat: data updated"
 ```
 
+## Debugging
+
+To see additional debug logs, create a secret with the name: `ACTIONS_STEP_DEBUG` and value `true`. There is no need to pass it as `env` to steps, it will work globally.
+
 ## How it works
 
 The actions checks for local changes which can be
