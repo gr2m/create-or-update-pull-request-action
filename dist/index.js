@@ -446,9 +446,7 @@ const { command } = __webpack_require__(955);
 const core = __webpack_require__(470);
 const { request } = __webpack_require__(753);
 
-const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
-  .toString(36)
-  .substr(2)}`;
+const TEMPORARY_BRANCH_NAME = "tmp-create-or-update-pull-request-action";
 
 main();
 
