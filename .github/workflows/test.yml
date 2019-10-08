@@ -1,4 +1,10 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
+      - "greenkeeper/*"
+  pull_request:
+    types: [opened, synchronize]
 name: Test
 jobs:
   # use no configuration. Will update existing pull request:
