@@ -626,13 +626,19 @@ async function checkOutRemoteBranch(branch) {
       return true;
     }
 
+    core.debug(`fetching "${branch}" branch from remote`);
     await command(
       `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`,
       { shell: true }
     );
 
+    core.debug(`Checking out "${branch}" branch locally`);
     await command(`git checkout ${branch}`, { shell: true });
     core.info(`Remote branch "${branch}" checked out locally.`);
+
+    core.debug(
+      `Rebasing "${branch}" locally using "git rebase -Xtheirs --autostash -"`
+    );
     await command(`git rebase -Xtheirs --autostash -`, { shell: true });
     return true;
   } catch (error) {
