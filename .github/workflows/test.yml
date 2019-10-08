@@ -21,6 +21,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTIONS_STEP_DEBUG: true
+        with:
+          commit-message: "Just testing [skip ci]"
 
   createNewPullRequest:
     name: "[TEST] Create new pull request"
