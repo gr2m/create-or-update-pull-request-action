@@ -548,7 +548,7 @@ async function main() {
     );
 
     if (currentBranch === DEFAULT_BRANCH) {
-      core.info(`Already in basen branch "${branch}".`);
+      core.info(`Already in base branch "${currentBranch}".`);
     } else {
       core.debug(`rebase all local changes on base branch`);
       await runShellCommand(
