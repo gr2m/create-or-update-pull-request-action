@@ -654,7 +654,7 @@ async function checkOutRemoteBranch(branch) {
     core.info(`Remote branch "${branch}" checked out locally.`);
 
     await runShellCommand(
-      `git rebase -X theirs --allow-empty-message "${TEMPORARY_BRANCH_NAME}"`
+      `git cherry-pick --strategy recursive --strategy-option theirs ${TEMPORARY_BRANCH_NAME}`
     );
 
     return true;
