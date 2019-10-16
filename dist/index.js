@@ -653,7 +653,9 @@ async function checkOutRemoteBranch(branch) {
     await runShellCommand(`git checkout ${branch}`);
     core.info(`Remote branch "${branch}" checked out locally.`);
 
-    await runShellCommand(`git rebase -X theirs "${TEMPORARY_BRANCH_NAME}"`);
+    await runShellCommand(
+      `git rebase -X theirs --allow-empty-message "${TEMPORARY_BRANCH_NAME}"`
+    );
 
     return true;
   } catch (error) {
