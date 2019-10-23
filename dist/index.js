@@ -596,7 +596,7 @@ async function getLocalChanges(path) {
   const output = await runShellCommand(`git status ${path || "*"}`);
 
   if (/Your branch is up to date/.test(output)) {
-    return;
+    return {};
   }
 
   const hasUncommitedChanges = /(Changes to be committed|Changes not staged|Untracked files)/.test(
