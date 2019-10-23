@@ -154,7 +154,7 @@ async function main() {
 async function getLocalChanges(path) {
   const output = await runShellCommand(`git status ${path || "*"}`);
 
-  if (/Your branch is up to date/.test(output)) {
+  if (/nothing to commit, working tree clean/i.test(output)) {
     return {};
   }
 
