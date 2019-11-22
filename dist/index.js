@@ -565,8 +565,17 @@ async function main() {
     );
 
     if (remoteBranchExists) {
-      core.info(`Existing pull request for "${inputs.branch}" updated`);
-      return;
+      const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
+      const { data } = await request("GET /search/issues", {
+        q
+      });
+
+      if (data.total_count > 0) {
+        core.info(
+          `Existing pull request for branch "${inputs.branch}" updated: ${data.items.html_url}`
+        );
+        return;
+      }
     }
 
     core.debug(`Creating pull request`);
