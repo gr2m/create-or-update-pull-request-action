@@ -7,7 +7,7 @@
 Minimal workflow example
 
 ```yml
-Name: Nightly update
+name: Nightly update
 on:
   schedule:
     # https://crontab.guru/every-night-at-midnight
