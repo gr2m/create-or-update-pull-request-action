@@ -16,7 +16,7 @@ async function main() {
     core.setFailed(
       `GITHUB_TOKEN is not configured. Make sure you made it available to your action
   
-  uses: gr2m/create-or-update-pull-request-with-local-changes-action@master
+  uses: gr2m/create-or-update-pull-request-action@master
   env:
     GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
     );
