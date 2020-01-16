@@ -90,6 +90,7 @@ The action is written in JavaScript. [Learn how to create your own](https://help
 - [@octokit/routes](https://github.com/octokit/routes/blob/master/.github/workflows/update.yml)
 - [@octokit/rest.js](https://github.com/octokit/rest.js/blob/master/.github/workflows/update-rest-endpoint-methods.yml)
 - [@sinchang/cn-starbucks-stores-data](https://github.com/sinchang/cn-starbucks-stores-data/blob/master/.github/workflows/update.yml)
+- [`ergebnis/composer-normalize`](https://github.com/ergebnis/composer-normalize/blob/69ec6fd9a87cbb16badf2a988f4372221592b05e/.github/workflows/schema.yml#L25-L38)
 
 Please send a pull request to add yours :)
 
