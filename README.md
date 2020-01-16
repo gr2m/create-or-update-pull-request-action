@@ -35,7 +35,7 @@ with:
   body: "My pull request body"
   branch: "my-pull-request-base-branch"
   path: "lib/"
-  commit-message: "My commit message for uncommited changes in lib/ folder"
+  commit-message: "My commit message for uncommitted changes in lib/ folder"
   author: "Lorem J. Ipsum <lorem@example.com>"
 ```
 
@@ -79,9 +79,9 @@ If there are changes, it does the following
 
 1. Sets `user.name` and `user.email` with `git config --global` based on the `author` input, unless it has been already set before.
 2. Looks for local changes with `git status`.
-3. Adds a new commit using the `commit-message` input if there are uncommited changes.
+3. Adds a new commit using the `commit-message` input if there are uncommitted changes.
 4. Pushes the local changes to remote using the branch configured in the `branch` input.
-5. Creates a pull request using the `title` and `body` inputs. If a pull request exists for the branch, it's checkoud out locally, rebased with `-XTheirs` and pushed with `--force` to update the pull request with the new changes.
+5. Creates a pull request using the `title` and `body` inputs. If a pull request exists for the branch, it's checked out locally, rebased with `-XTheirs` and pushed with `--force` to update the pull request with the new changes.
 
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
 
