@@ -521,7 +521,7 @@ async function main() {
       const matches = inputs.author.match(/^([^<]+)\s*<([^>]+)>$/);
       assert(
         matches,
-        `The "author" input "${inputs.author}" does conform to the "Name <email@domain.test>" format`
+        `The "author" input "${inputs.author}" does not conform to the "Name <email@domain.test>" format`
       );
       const [, name, email] = matches;
 
