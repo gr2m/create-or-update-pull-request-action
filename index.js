@@ -177,12 +177,12 @@ async function main() {
         }
       );
       core.info(`Labels added: ${labels.join(", ")}`);
-      core.debug(data);
+      core.debug(inspect(data));
     }
 
     await runShellCommand(`git stash pop || true`);
   } catch (error) {
-    core.debug(inspect(error));
+    core.info(inspect(error));
     core.setFailed(error.message);
   }
 }
