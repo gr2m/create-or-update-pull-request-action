@@ -163,16 +163,21 @@ async function main() {
 
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
-      await request(`/repos/{owner}/{repo}/issues/{issue_number}/labels`, {
-        headers: {
-          authorization: `token ${process.env.GITHUB_TOKEN}`,
-        },
-        owner,
-        repo,
-        issue_number: number,
-        labels: inputs.labels.trim().split(/\s*,\s*/),
-      });
-      core.info(`Labels added: ${inputs.labels}`);
+      const labels = inputs.labels.trim().split(/\s*,\s*/);
+      const { data } = await request(
+        `/repos/{owner}/{repo}/issues/{issue_number}/labels`,
+        {
+          headers: {
+            authorization: `token ${process.env.GITHUB_TOKEN}`,
+          },
+          owner,
+          repo,
+          issue_number: number,
+          labels,
+        }
+      );
+      core.info(`Labels added: ${labels.join(", ")}`);
+      core.debug(data);
     }
 
     await runShellCommand(`git stash pop || true`);
