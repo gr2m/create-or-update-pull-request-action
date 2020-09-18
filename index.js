@@ -36,6 +36,8 @@ async function main() {
     return;
   }
 
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+
   try {
     const inputs = {
       title: core.getInput("title"),
@@ -43,17 +45,20 @@ async function main() {
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
-      author: core.getInput("author")
+      author: core.getInput("author"),
+      labels: core.getInput("labels"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
     const {
-      data: { default_branch }
-    } = await request(`GET /repos/${process.env.GITHUB_REPOSITORY}`, {
+      data: { default_branch },
+    } = await request(`GET /repos/{owner}/{repo}`, {
       headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`
-      }
+        authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+      owner,
+      repo,
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
@@ -86,7 +91,7 @@ async function main() {
 
       await setGitUser({
         name,
-        email
+        email,
       });
     }
 
@@ -128,7 +133,7 @@ async function main() {
     if (remoteBranchExists) {
       const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
       const { data } = await request("GET /search/issues", {
-        q
+        q,
       });
 
       if (data.total_count > 0) {
@@ -141,21 +146,57 @@ async function main() {
 
     core.debug(`Creating pull request`);
     const {
-      data: { html_url }
-    } = await request(`POST /repos/${process.env.GITHUB_REPOSITORY}/pulls`, {
+      data: { html_url, number },
+    } = await request(`POST /repos/{owner}/{repo}/pulls`, {
       headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`
+        authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
+      owner,
+      repo,
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
-      base: DEFAULT_BRANCH
+      base: DEFAULT_BRANCH,
     });
 
-    core.info(`Pull request created: ${html_url}`);
+    core.info(`Pull request created: ${html_url} (#${number})`);
+
+    if (inputs.labels) {
+      core.debug(`Adding labels: ${inputs.labels}`);
+      const labels = inputs.labels.trim().split(/\s*,\s*/);
+      const options = request.endpoint(
+        "/repos/{owner}/{repo}/issues/{issue_number}/labels",
+        {
+          headers: {
+            authorization: `token ${process.env.GITHUB_TOKEN}`,
+          },
+          owner,
+          repo,
+          issue_number: number,
+          labels,
+        }
+      );
+      core.debug(inspect(options));
+
+      const { data } = await request(
+        `/repos/{owner}/{repo}/issues/{issue_number}/labels`,
+        {
+          headers: {
+            authorization: `token ${process.env.GITHUB_TOKEN}`,
+          },
+          owner,
+          repo,
+          issue_number: number,
+          labels,
+        }
+      );
+      core.info(`Labels added: ${labels.join(", ")}`);
+      core.debug(inspect(data));
+    }
+
     await runShellCommand(`git stash pop || true`);
   } catch (error) {
-    core.debug(inspect(error));
+    core.info(inspect(error));
     core.setFailed(error.message);
   }
 }
@@ -173,7 +214,7 @@ async function getLocalChanges(path) {
 
   return {
     hasUncommitedChanges,
-    hasChanges: hasUncommitedChanges
+    hasChanges: hasUncommitedChanges,
   };
 }
 
@@ -184,7 +225,7 @@ async function getGitUser() {
 
     return {
       name,
-      email
+      email,
     };
   } catch (error) {
     return;
