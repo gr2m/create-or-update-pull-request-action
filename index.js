@@ -164,22 +164,8 @@ async function main() {
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
       const labels = inputs.labels.trim().split(/\s*,\s*/);
-      const options = request.endpoint(
-        "/repos/{owner}/{repo}/issues/{issue_number}/labels",
-        {
-          headers: {
-            authorization: `token ${process.env.GITHUB_TOKEN}`,
-          },
-          owner,
-          repo,
-          issue_number: number,
-          labels,
-        }
-      );
-      core.debug(inspect(options));
-
       const { data } = await request(
-        `/repos/{owner}/{repo}/issues/{issue_number}/labels`,
+        `POST /repos/{owner}/{repo}/issues/{issue_number}/labels`,
         {
           headers: {
             authorization: `token ${process.env.GITHUB_TOKEN}`,
