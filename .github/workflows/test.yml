@@ -42,6 +42,8 @@ jobs:
           branch: test-create-new-pull-request
           commit-message: "Just testing [skip ci]"
           author: "J. Doe <j@example.com>"
+          labels: test1, test2
+      - run: sleep 3 # wait 3s before deleting the pull request to give GitHub time to fully replicate
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
