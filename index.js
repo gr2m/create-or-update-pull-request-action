@@ -44,16 +44,18 @@ async function main() {
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
+      labels: core.getInput("labels"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
     const {
       data: { default_branch },
-    } = await request(`GET /repos/${process.env.GITHUB_REPOSITORY}`, {
+    } = await request(`GET /repos/{repository}`, {
       headers: {
         authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
+      repository: process.env.GITHUB_REPOSITORY,
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
@@ -141,11 +143,12 @@ async function main() {
 
     core.debug(`Creating pull request`);
     const {
-      data: { html_url },
-    } = await request(`POST /repos/${process.env.GITHUB_REPOSITORY}/pulls`, {
+      data: { html_url, number },
+    } = await request(`POST /repos/{repository}/pulls`, {
       headers: {
         authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
+      repository: process.env.GITHUB_REPOSITORY,
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
@@ -153,6 +156,20 @@ async function main() {
     });
 
     core.info(`Pull request created: ${html_url}`);
+
+    if (inputs.labels) {
+      core.debug(`Adding labels: ${inputs.labels}`);
+      await request(`/repos/{repository}/issues/{issue_number}/labels`, {
+        headers: {
+          authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+        repository: process.env.GITHUB_REPOSITORY,
+        issue_number: number,
+        labels: inputs.labels.trim().split(/\s*,\s*/),
+      });
+      core.info(`Labels added: ${inputs.labels}`);
+    }
+
     await runShellCommand(`git stash pop || true`);
   } catch (error) {
     core.debug(inspect(error));
