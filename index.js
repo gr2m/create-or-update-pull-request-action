@@ -36,6 +36,8 @@ async function main() {
     return;
   }
 
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+
   try {
     const inputs = {
       title: core.getInput("title"),
@@ -51,11 +53,12 @@ async function main() {
 
     const {
       data: { default_branch },
-    } = await request(`GET /repos/{repository}`, {
+    } = await request(`GET /repos/{owner}/{repo}`, {
       headers: {
         authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
-      repository: process.env.GITHUB_REPOSITORY,
+      owner,
+      repo,
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
@@ -144,11 +147,12 @@ async function main() {
     core.debug(`Creating pull request`);
     const {
       data: { html_url, number },
-    } = await request(`POST /repos/{repository}/pulls`, {
+    } = await request(`POST /repos/{owner}/{repo}/pulls`, {
       headers: {
         authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
-      repository: process.env.GITHUB_REPOSITORY,
+      owner,
+      repo,
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
@@ -159,11 +163,12 @@ async function main() {
 
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
-      await request(`/repos/{repository}/issues/{issue_number}/labels`, {
+      await request(`/repos/{owner}/{repo}/issues/{issue_number}/labels`, {
         headers: {
           authorization: `token ${process.env.GITHUB_TOKEN}`,
         },
-        repository: process.env.GITHUB_REPOSITORY,
+        owner,
+        repo,
         issue_number: number,
         labels: inputs.labels.trim().split(/\s*,\s*/),
       });
