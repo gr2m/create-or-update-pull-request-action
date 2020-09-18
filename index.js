@@ -43,17 +43,17 @@ async function main() {
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
-      author: core.getInput("author")
+      author: core.getInput("author"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
     const {
-      data: { default_branch }
+      data: { default_branch },
     } = await request(`GET /repos/${process.env.GITHUB_REPOSITORY}`, {
       headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`
-      }
+        authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
@@ -86,7 +86,7 @@ async function main() {
 
       await setGitUser({
         name,
-        email
+        email,
       });
     }
 
@@ -128,7 +128,7 @@ async function main() {
     if (remoteBranchExists) {
       const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
       const { data } = await request("GET /search/issues", {
-        q
+        q,
       });
 
       if (data.total_count > 0) {
@@ -141,15 +141,15 @@ async function main() {
 
     core.debug(`Creating pull request`);
     const {
-      data: { html_url }
+      data: { html_url },
     } = await request(`POST /repos/${process.env.GITHUB_REPOSITORY}/pulls`, {
       headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`
+        authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
-      base: DEFAULT_BRANCH
+      base: DEFAULT_BRANCH,
     });
 
     core.info(`Pull request created: ${html_url}`);
@@ -173,7 +173,7 @@ async function getLocalChanges(path) {
 
   return {
     hasUncommitedChanges,
-    hasChanges: hasUncommitedChanges
+    hasChanges: hasUncommitedChanges,
   };
 }
 
@@ -184,7 +184,7 @@ async function getGitUser() {
 
     return {
       name,
-      email
+      email,
     };
   } catch (error) {
     return;
