@@ -29,6 +29,8 @@ inputs:
     default: Update from 'Create or Update Request' action
   path:
     description: Commit selected files only by providing a path. It is used in `git add "<path>"`
+  labels:
+    description: Comma separated list of labels to apply to the pull request
 runs:
   using: "node12"
   main: "dist/index.js"
