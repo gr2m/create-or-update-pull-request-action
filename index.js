@@ -159,7 +159,7 @@ async function main() {
       base: DEFAULT_BRANCH,
     });
 
-    core.info(`Pull request created: ${html_url}`);
+    core.info(`Pull request created: ${html_url} (#${number})`);
 
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
