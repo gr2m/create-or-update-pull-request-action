@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/gr2m/create-or-update-pull-request-action#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1",
+    "@actions/core": "^1.2.6",
     "@octokit/request": "^5.1.0",
     "execa": "^2.0.4"
   },
