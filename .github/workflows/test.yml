@@ -2,9 +2,6 @@ on:
   push:
     branches:
       - master
-      - "greenkeeper/**"
-  pull_request:
-    types: [opened, synchronize]
 name: Test
 jobs:
   # use no configuration. Will update existing pull request:
@@ -13,7 +10,7 @@ jobs:
     name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - run: "date > test.txt"
       - run: "npm ci"
       - run: "npm run build"
@@ -28,7 +25,7 @@ jobs:
     name: "[TEST] Create new pull request"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - run: "date > test.txt"
       - run: "npm ci"
       - run: "npm run build"
@@ -51,7 +48,7 @@ jobs:
     name: "[TEST] Create multiple commits"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - run: "date > file1.txt"
       - run: "date > file2.txt"
       - run: "npm ci"
