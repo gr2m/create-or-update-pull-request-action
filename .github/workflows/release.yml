@@ -8,7 +8,7 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
@@ -16,7 +16,7 @@ jobs:
       - run: npm run build
       - run: npx semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GR2M_PAT_FOR_SEMANTIC_RELEASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:refs/heads/v1.x"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
