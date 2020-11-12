@@ -17,5 +17,6 @@ jobs:
           title: "Debug"
           body: "debugging #245"
           branch: "debug-issue-245"
+          path: "test.txt"
           commit-message: "debug"
           author: "Gregor Martynus <39992+gr2m@users.noreply.github.com>"
