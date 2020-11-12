@@ -5,6 +5,7 @@ jobs:
   issue_245:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - run: date > test.txt
       - run: git add test.txt
       - run: "npm ci"
