@@ -6,8 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: date > test.txt
-      - run: git add test.txt
+        ref: "debug"
+      # - run: date > test.txt
+      # - run: git add test.txt
       - run: "npm ci"
       - run: "npm run build"
       - uses: ./
@@ -17,5 +18,6 @@ jobs:
           title: "Debug"
           body: "debugging #245"
           branch: "debug-issue-245"
+          path: "test.txt"
           commit-message: "debug"
           author: "Gregor Martynus <39992+gr2m@users.noreply.github.com>"
