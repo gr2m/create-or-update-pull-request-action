@@ -1,0 +1,20 @@
+name: debug
+on: workflow_dispatch
+
+jobs:
+  issue_245:
+    runs-on: ubuntu-latest
+    steps:
+      - run: date > test.txt
+      - run: git add test.txt
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: "Debug"
+          body: "debugging #245"
+          branch: "debug-issue-245"
+          commit-message: "debug"
+          author: "Gregor Martynus <39992+gr2m@users.noreply.github.com>"
