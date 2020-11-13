@@ -248,9 +248,16 @@ async function checkOutRemoteBranch(branch) {
     await runShellCommand(`git checkout ${branch}`);
     core.info(`Remote branch "${branch}" checked out locally.`);
 
-    await runShellCommand(
-      `git cherry-pick --strategy recursive --strategy-option theirs ${TEMPORARY_BRANCH_NAME}`
-    );
+    try {
+      await runShellCommand(
+        `git cherry-pick --strategy recursive --strategy-option theirs ${TEMPORARY_BRANCH_NAME}`
+      );
+    } catch (error) {
+      // https://github.com/gr2m/create-or-update-pull-request-action/issues/245
+      if (/The previous cherry-pick is now empty/.test(error.stderr)) {
+        await runShellCommand(`git cherry-pick --skip`);
+      }
+    }
 
     return true;
   } catch (error) {
