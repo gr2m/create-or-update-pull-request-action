@@ -89,3 +89,20 @@ jobs:
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-with-multiple-commits"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # expect to detect changes in a hidden file:
+  # https://github.com/gr2m/create-or-update-pull-request-action/pull/262
+  hiddenFile:
+    name: "[TEST] Create or update pull request for hidden file"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: "date > .github/test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          commit-message: "Just testing [skip ci]"
