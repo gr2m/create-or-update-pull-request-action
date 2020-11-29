@@ -691,7 +691,7 @@ async function main() {
 }
 
 async function getLocalChanges(path) {
-  const output = await runShellCommand(`git status ${path || "*"}`);
+  const output = await runShellCommand(`git status ${path}`);
 
   if (/nothing to commit, working tree clean/i.test(output)) {
     return {};
