@@ -14,7 +14,6 @@ jobs:
           node-version: "12.x"
       - run: npm ci
       - run: npm run build
-      - run: rm .gitignore # commit dist folder
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
