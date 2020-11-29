@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - run: "date > datetime.txt" # create or update a test.txt file
-      - uses: gr2m/create-or-update-pull-request-action@v1.x
+      - uses: gr2m/create-or-update-pull-request-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -27,7 +27,7 @@ jobs:
 Customizations
 
 ```yml
-uses: gr2m/create-or-update-pull-request-action@v1.x
+uses: gr2m/create-or-update-pull-request-action@v1
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
@@ -43,7 +43,7 @@ with:
 To create multiple commits for different paths, use the action multiple times
 
 ```yml
-- uses: gr2m/create-or-update-pull-request-action@v1.x
+- uses: gr2m/create-or-update-pull-request-action@v1
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   with:
@@ -53,7 +53,7 @@ To create multiple commits for different paths, use the action multiple times
     author: "Lorem J. Ipsum <lorem@example.com>"
     path: "cache/"
     commit-message: "build: cache"
-- uses: gr2m/create-or-update-pull-request-action@v1.x
+- uses: gr2m/create-or-update-pull-request-action@v1
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   with:
