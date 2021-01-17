@@ -462,7 +462,7 @@ async function main() {
 
     core.debug(`Local changes found`);
 
-    await runShellCommand(`git checkout -b "${TEMPORARY_BRANCH_NAME}"`);
+    await runShellCommand(`git checkout -b '${TEMPORARY_BRANCH_NAME}'`);
 
     const gitUser = await getGitUser();
     if (gitUser) {
@@ -490,7 +490,7 @@ async function main() {
     }
 
     await runShellCommand(
-      `git commit -m "${inputs.commitMessage}" --author "${inputs.author}"`
+      `git commit -m '${inputs.commitMessage}' --author '${inputs.author}'`
     );
 
     const currentBranch = await runShellCommand(
@@ -505,7 +505,7 @@ async function main() {
         `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
       );
       await runShellCommand(`git stash --include-untracked`);
-      await runShellCommand(`git rebase -X theirs "${DEFAULT_BRANCH}"`);
+      await runShellCommand(`git rebase -X theirs '${DEFAULT_BRANCH}'`);
     }
 
     core.debug(`Try to fetch and checkout remote branch "${inputs.branch}"`);
@@ -606,10 +606,10 @@ async function getGitUser() {
 
 async function setGitUser({ name, email }) {
   core.debug(`Configuring user.name as "${name}"`);
-  await runShellCommand(`git config --global user.name "${name}"`);
+  await runShellCommand(`git config --global user.name '${name}'`);
 
   core.debug(`Configuring user.email as "${email}"`);
-  await runShellCommand(`git config --global user.email "${email}"`);
+  await runShellCommand(`git config --global user.email '${email}'`);
 }
 
 async function checkOutRemoteBranch(branch) {
