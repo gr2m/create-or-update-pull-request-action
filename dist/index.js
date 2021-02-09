@@ -519,6 +519,9 @@ async function main() {
     if (remoteBranchExists) {
       const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
       const { data } = await request("GET /search/issues", {
+        headers: {
+          authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
         q,
       });
 
