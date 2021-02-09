@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: {}
 name: Test
 jobs:
   # use no configuration. Will update existing pull request:
