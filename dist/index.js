@@ -389,7 +389,9 @@ const { inspect } = __webpack_require__(669);
 
 const { command } = __webpack_require__(955);
 const core = __webpack_require__(470);
-const { request } = __webpack_require__(753);
+const {
+  request: { defaults },
+} = __webpack_require__(753);
 
 const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
   .toString(36)
@@ -422,6 +424,12 @@ async function main() {
     return;
   }
 
+  const request = defaults({
+    headers: {
+      authorization: `token ${process.env.GITHUB_TOKEN}`,
+    },
+  });
+
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
   try {
@@ -440,9 +448,6 @@ async function main() {
     const {
       data: { default_branch },
     } = await request(`GET /repos/{owner}/{repo}`, {
-      headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`,
-      },
       owner,
       repo,
     });
@@ -519,9 +524,6 @@ async function main() {
     if (remoteBranchExists) {
       const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
       const { data } = await request("GET /search/issues", {
-        headers: {
-          authorization: `token ${process.env.GITHUB_TOKEN}`,
-        },
         q,
       });
 
@@ -537,9 +539,6 @@ async function main() {
     const {
       data: { html_url, number },
     } = await request(`POST /repos/{owner}/{repo}/pulls`, {
-      headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`,
-      },
       owner,
       repo,
       title: inputs.title,
@@ -556,9 +555,6 @@ async function main() {
       const { data } = await request(
         `POST /repos/{owner}/{repo}/issues/{issue_number}/labels`,
         {
-          headers: {
-            authorization: `token ${process.env.GITHUB_TOKEN}`,
-          },
           owner,
           repo,
           issue_number: number,
