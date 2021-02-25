@@ -38,6 +38,7 @@ with:
   commit-message: "My commit message for uncommitted changes in lib/ folder"
   author: "Lorem J. Ipsum <lorem@example.com>"
   labels: label1, label2
+  assignees: user1, user2
 ```
 
 To create multiple commits for different paths, use the action multiple times
