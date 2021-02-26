@@ -55,6 +55,7 @@ async function main() {
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
       labels: core.getInput("labels"),
+      assignees: core.getInput("assignees")
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -176,6 +177,22 @@ async function main() {
         }
       );
       core.info(`Labels added: ${labels.join(", ")}`);
+      core.debug(inspect(data));
+    }
+
+    if (inputs.assignees) {
+      core.debug(`Adding assignees: ${inputs.assignees}`);
+      const assignees = inputs.assignees.trim().split(/\s*,\s*/);
+      const { data } = await request(
+        `POST /repos/{owner}/{repo}/issues/{issue_number}/assignees`,
+        {
+          owner,
+          repo,
+          issue_number: number,
+          assignees,
+        }
+      );
+      core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
 
