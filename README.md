@@ -17,7 +17,9 @@ jobs:
   update_routes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - run: "date > datetime.txt" # create or update a test.txt file
       - uses: gr2m/create-or-update-pull-request-action@v1
         env:
