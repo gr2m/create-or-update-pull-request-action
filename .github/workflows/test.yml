@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - run: "date > test.txt"
       - run: "npm ci"
       - run: "npm run build"
@@ -27,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - run: "date > test.txt"
       - run: "npm ci"
       - run: "npm run build"
@@ -51,6 +55,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - run: "date > file1.txt"
       - run: "date > file2.txt"
       - run: "npm ci"
@@ -99,6 +105,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - run: "date > .github/test.txt"
       - run: "npm ci"
       - run: "npm run build"
