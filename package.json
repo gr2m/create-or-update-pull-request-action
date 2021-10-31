@@ -19,7 +19,6 @@
     "execa": "^2.0.4"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "semantic-release": "^17.2.3"
+    "@zeit/ncc": "^0.20.5"
   }
 }
