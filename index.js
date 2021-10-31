@@ -213,13 +213,19 @@ async function main() {
           }
         }
       `;
-      const result = await octokit.graphql(query, {
-        pullRequestId: node_id,
-        mergeMethod: inputs.autoMerge.toUpperCase(),
-        commitHeadline: inputs.title,
-      });
-      core.info(`Auto merge enabled`);
-      core.debug(inspect(result));
+      try {
+        const result = await octokit.graphql(query, {
+          pullRequestId: node_id,
+          mergeMethod: inputs.autoMerge.toUpperCase(),
+          commitHeadline: inputs.title,
+        });
+        core.info(`Auto merge enabled`);
+        core.debug(inspect(result));
+      } catch (error) {
+        core.warning(
+          `Auto merge could not be enabled for the pull request. Make sure the feature is enabled in the repository settings`
+        );
+      }
     }
 
     await runShellCommand(`git stash pop || true`);
