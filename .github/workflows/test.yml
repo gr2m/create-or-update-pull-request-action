@@ -72,6 +72,7 @@ jobs:
           author: "J. Doe <j@example.com>"
           path: file1.txt
           commit-message: "file 1 created [skip ci]"
+      - run: "npm run build"
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +84,7 @@ jobs:
           author: "J. Doe <j@example.com>"
           path: file2.txt
           commit-message: "file 2 created [skip ci]"
+      - run: "npm run build"
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
