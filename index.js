@@ -3,9 +3,7 @@ const { inspect } = require("util");
 
 const { command } = require("execa");
 const core = require("@actions/core");
-const {
-  request: { defaults },
-} = require("@octokit/request");
+const { Octokit } = require("@octokit/core");
 
 const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
   .toString(36)
@@ -38,10 +36,8 @@ async function main() {
     return;
   }
 
-  const request = defaults({
-    headers: {
-      authorization: `token ${process.env.GITHUB_TOKEN}`,
-    },
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
   });
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
@@ -55,14 +51,25 @@ async function main() {
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
       labels: core.getInput("labels"),
-      assignees: core.getInput("assignees")
+      assignees: core.getInput("assignees"),
+      autoMerge: core.getInput("auto-merge"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
 
+    if (
+      inputs.autoMerge &&
+      !["merge", "squash", "rebase"].includes(inputs.autoMerge)
+    ) {
+      core.setFailed(
+        `auto-merge is set to "${inputs.autoMerge}", but must be one of "merge", "squash", "rebase"`
+      );
+      process.exit(1);
+    }
+
     const {
       data: { default_branch },
-    } = await request(`GET /repos/{owner}/{repo}`, {
+    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
       owner,
       repo,
     });
@@ -138,7 +145,7 @@ async function main() {
 
     if (remoteBranchExists) {
       const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
-      const { data } = await request("GET /search/issues", {
+      const { data } = await octokit.request("GET /search/issues", {
         q,
       });
 
@@ -152,8 +159,8 @@ async function main() {
 
     core.debug(`Creating pull request`);
     const {
-      data: { html_url, number },
-    } = await request(`POST /repos/{owner}/{repo}/pulls`, {
+      data: { html_url, number, node_id },
+    } = await octokit.request(`POST /repos/{owner}/{repo}/pulls`, {
       owner,
       repo,
       title: inputs.title,
@@ -167,7 +174,7 @@ async function main() {
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
       const labels = inputs.labels.trim().split(/\s*,\s*/);
-      const { data } = await request(
+      const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/issues/{issue_number}/labels`,
         {
           owner,
@@ -183,7 +190,7 @@ async function main() {
     if (inputs.assignees) {
       core.debug(`Adding assignees: ${inputs.assignees}`);
       const assignees = inputs.assignees.trim().split(/\s*,\s*/);
-      const { data } = await request(
+      const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/issues/{issue_number}/assignees`,
         {
           owner,
@@ -194,6 +201,24 @@ async function main() {
       );
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
+    }
+
+    if (inputs.autoMerge) {
+      const query = `
+        mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+          mergePullRequest(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod}) {
+            actor {
+              login
+            }
+          }
+        }
+      `;
+      const result = await octokit.graphql(query, {
+        pullRequestId: node_id,
+        mergeMethod: inputs.autoMerge.toUpperCase(),
+      });
+      core.info(`Auto merge enabled`);
+      core.debug(inspect(result));
     }
 
     await runShellCommand(`git stash pop || true`);
@@ -210,9 +235,8 @@ async function getLocalChanges(path) {
     return {};
   }
 
-  const hasUncommitedChanges = /(Changes to be committed|Changes not staged|Untracked files)/.test(
-    output
-  );
+  const hasUncommitedChanges =
+    /(Changes to be committed|Changes not staged|Untracked files)/.test(output);
 
   return {
     hasUncommitedChanges,
