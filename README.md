@@ -41,7 +41,10 @@ with:
   author: "Lorem J. Ipsum <lorem@example.com>"
   labels: label1, label2
   assignees: user1, user2
+  auto-merge: squash
 ```
+
+**Note:** `auto-merge` is optional. It can be set to `merge`, `squash`, or `rebase`. If [auto-merging](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) is disabled in the repository, a warning will be logged, but the action will not fail.
 
 To create multiple commits for different paths, use the action multiple times
 
