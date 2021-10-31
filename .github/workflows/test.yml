@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+      - 311/add-auto-merge-option
   workflow_dispatch: {}
 name: Test
 jobs:
@@ -97,6 +98,28 @@ jobs:
           path: does_not_exist.txt
           commit-message: "this should fail silently, not commit should be created"
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-with-multiple-commits"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  autoMerge:
+    name: "[TEST] Auto merge"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - run: "date > test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          commit-message: "Testing auto-merge"
+          auto-merge: squash
+          branch: test-auto-merge
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-auto-merge"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
