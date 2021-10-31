@@ -2,6 +2,10 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
   workflow_dispatch: {}
 name: Test
 jobs:
