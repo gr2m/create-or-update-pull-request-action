@@ -206,7 +206,7 @@ async function main() {
     if (inputs.autoMerge) {
       const query = `
         mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!, $commitHeadline: String!) {
-          mergePullRequest(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod, commitHeadline: $commitHeadline}) {
+          enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod, commitHeadline: $commitHeadline}) {
             actor {
               login
             }
