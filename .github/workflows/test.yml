@@ -119,6 +119,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTIONS_STEP_DEBUG: true
         with:
+          title: Test pull request for `auto-merge` option
           commit-message: "Testing auto-merge"
           auto-merge: squash
           branch: test-auto-merge
