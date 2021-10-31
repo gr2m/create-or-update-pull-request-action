@@ -205,8 +205,8 @@ async function main() {
 
     if (inputs.autoMerge) {
       const query = `
-        mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
-          mergePullRequest(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod}) {
+        mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!, $commitHeadline: String!) {
+          mergePullRequest(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod, commitHeadline: $commitHeadline}) {
             actor {
               login
             }
@@ -216,6 +216,7 @@ async function main() {
       const result = await octokit.graphql(query, {
         pullRequestId: node_id,
         mergeMethod: inputs.autoMerge.toUpperCase(),
+        commitHeadline: inputs.title,
       });
       core.info(`Auto merge enabled`);
       core.debug(inspect(result));
