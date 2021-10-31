@@ -29,10 +29,17 @@ inputs:
     default: Update from 'Create or Update Request' action
   path:
     description: Commit selected files only by providing a path. It is used in `git add "<path>"`
+    required: false
   labels:
     description: Comma separated list of labels to apply to the pull request
+    required: false
   assignees:
     description: Comma separated list of assignees to apply to the pull request
+    required: false
+  auto-merge:
+    description: "Enable auto merge for pull request. Requires auto merging to be enabled in repository settings"
+    required: false
+
 runs:
   using: "node12"
   main: "dist/index.js"
