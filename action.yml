@@ -40,6 +40,12 @@ inputs:
     description: "Enable auto merge for pull request. Requires auto merging to be enabled in repository settings"
     required: false
 
+outputs:
+  pr-number:
+    description: "Number of the created/updated PR"
+  result:
+    description: "'updated' or 'created' based if the PR was created or updated"
+
 runs:
   using: "node12"
   main: "dist/index.js"
