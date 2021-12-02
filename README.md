@@ -92,8 +92,8 @@ If there are changes, it does the following
 
 The actions outputs following properties:
 
- - `pr-number` - number of created/updated PR
- - `result` - `created` or `updated` depending the PR was created or only updated
+ - `pull-request-number` - number of created/updated PR. Not set if result is `unchanged`.
+ - `result` - `created`, `updated` or `unchanged` based if the PR was created, updated or if there were no local changes.
 
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
 
