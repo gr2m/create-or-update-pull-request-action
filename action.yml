@@ -39,6 +39,9 @@ inputs:
   auto-merge:
     description: "Enable auto merge for pull request. Requires auto merging to be enabled in repository settings"
     required: false
+  disable-auto-update-pr:
+    description: "Disable the title and body of existing pull request automatically updated."
+    required: false
 
 outputs:
   pull-request-number:
