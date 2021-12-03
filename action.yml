@@ -12,7 +12,7 @@ inputs:
     description: "Pull Request body"
     required: true
     default: |
-      This pull request has been created by the ["Create or Update Pull Request" action](https://github.com/gr2m/create-or-update-pull-request-action#readme). 
+      This pull request has been created by the ["Create or Update Pull Request" action](https://github.com/gr2m/create-or-update-pull-request-action#readme).
 
       You can set a custom pull request title, body, branch and commit messages, see [Usage](https://github.com/gr2m/create-or-update-pull-request-action#usage).
   branch:
@@ -39,6 +39,12 @@ inputs:
   auto-merge:
     description: "Enable auto merge for pull request. Requires auto merging to be enabled in repository settings"
     required: false
+
+outputs:
+  pull-request-number:
+    description: "Number of the created/updated pull request"
+  result:
+    description: "'updated', 'created', 'unchanged' based if the PR was created, updated or nothing happened"
 
 runs:
   using: "node12"

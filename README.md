@@ -90,6 +90,11 @@ If there are changes, it does the following
 4. Pushes the local changes to remote using the branch configured in the `branch` input.
 5. Creates a pull request using the `title` and `body` inputs. If a pull request exists for the branch, it's checked out locally, rebased with `-XTheirs` and pushed with `--force` to update the pull request with the new changes.
 
+The actions outputs following properties:
+
+ - `pull-request-number` - number of created/updated PR. Not set if result is `unchanged`.
+ - `result` - `created`, `updated` or `unchanged` based if the PR was created, updated or if there were no local changes.
+
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
 
 ## Who is using it

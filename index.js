@@ -84,6 +84,8 @@ async function main() {
       } else {
         core.info("No local changes");
       }
+
+      core.setOutput("result", "unchanged")
       process.exit(0); // there is currently no neutral exit code
     }
 
@@ -150,8 +152,12 @@ async function main() {
       });
 
       if (data.total_count > 0) {
+        const prInfo = data.items[0]; // Assuming there is only one PR for given branch
+
+        core.setOutput(`pull-request-number`, prInfo.number);
+        core.setOutput(`result`, `updated`);
         core.info(
-          `Existing pull request for branch "${inputs.branch}" updated: ${data.items.html_url}`
+          `Existing pull request for branch "${inputs.branch}" updated: ${prInfo.html_url}`
         );
         return;
       }
@@ -170,6 +176,9 @@ async function main() {
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
+
+    core.setOutput(`pull-request-number`, number);
+    core.setOutput(`result`, `created`);
 
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
