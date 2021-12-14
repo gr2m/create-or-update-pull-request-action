@@ -26,6 +26,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+`persist-credentials: false` is crucial otherwise Git push is performed with `github.token` and not the token you configure using the `env: GITHUB_TOKEN`.
+
 Customizations
 
 ```yml
