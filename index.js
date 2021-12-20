@@ -53,7 +53,7 @@ async function main() {
       labels: core.getInput("labels"),
       assignees: core.getInput("assignees"),
       autoMerge: core.getInput("auto-merge"),
-      disableAutoUpdatePR: core.getInput("disable-auto-update-pr"),
+      updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -160,7 +160,7 @@ async function main() {
         core.info(
           `Existing pull request for branch "${inputs.branch}" updated: ${prInfo.html_url}`
         );
-        if (inputs.disableAutoUpdatePR) return
+        if (!inputs.updatePRTitleAndBody) return
         await octokit.request(`POST /repos/{owner}/{repo}/pulls/{number}`, {
           owner,
           repo,
