@@ -28,7 +28,7 @@ jobs:
           ACTIONS_STEP_DEBUG: true
         with:
           commit-message: "Just testing [skip ci]"
-      - if: ${{ steps.run.outputs.result != 'updated' || steps.run.outputs.pull-request-number > 0 }}
+      - if: ${{ steps.run.outputs.result != 'updated' || !(steps.run.outputs.pull-request-number > 0) }}
         run: 'echo "Output of action is not as expected" && exit 1'
 
   createNewPullRequest:
@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ steps.run.outputs.result != 'created' }}
         run: 'echo "result output is  \"${{ steps.run.outputs.result }}\" but expected \"created\"" && exit 1'
-      - if: ${{ steps.run.outputs.pull-request-number > 0 }}
+      - if: ${{ !(steps.run.outputs.pull-request-number > 0) }}
         run: 'echo "pull-request-number output is  \"${{ steps.run.outputs.pull-request-number }}\" but expected a number" && exit 1'
 
   multipleCommits:
