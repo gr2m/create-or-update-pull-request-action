@@ -86,7 +86,7 @@ async function main() {
         core.info("No local changes");
       }
 
-      core.setOutput("result", "unchanged")
+      core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
 
@@ -160,7 +160,11 @@ async function main() {
         core.info(
           `Existing pull request for branch "${inputs.branch}" updated: ${prInfo.html_url}`
         );
-        if (inputs.updatePRTitleAndBody === false || inputs.updatePRTitleAndBody === 'false') return
+        if (
+          inputs.updatePRTitleAndBody === false ||
+          inputs.updatePRTitleAndBody === "false"
+        )
+          return;
         await octokit.request(`POST /repos/{owner}/{repo}/pulls/{number}`, {
           owner,
           repo,
@@ -168,9 +172,7 @@ async function main() {
           title: inputs.title,
           body: inputs.body,
         });
-        core.info(
-          `PR title and body are updated`
-        );
+        core.info(`PR title and body are updated`);
         return;
       }
     }
