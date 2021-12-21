@@ -41,7 +41,7 @@ inputs:
     required: false
   update-pull-request-title-and-body:
     description: "Set to true if you want the title and body to be updated for an existing pull request"
-    default: false
+    default: "false"
     required: false
 
 outputs:
