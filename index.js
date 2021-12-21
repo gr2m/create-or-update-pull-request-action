@@ -168,7 +168,7 @@ async function main() {
         await octokit.request(`POST /repos/{owner}/{repo}/pulls/{number}`, {
           owner,
           repo,
-          number,
+          number: prInfo.number,
           title: inputs.title,
           body: inputs.body,
         });
