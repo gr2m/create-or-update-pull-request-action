@@ -53,6 +53,7 @@ async function main() {
       labels: core.getInput("labels"),
       assignees: core.getInput("assignees"),
       autoMerge: core.getInput("auto-merge"),
+      updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -85,7 +86,7 @@ async function main() {
         core.info("No local changes");
       }
 
-      core.setOutput("result", "unchanged")
+      core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
 
@@ -159,6 +160,15 @@ async function main() {
         core.info(
           `Existing pull request for branch "${inputs.branch}" updated: ${prInfo.html_url}`
         );
+        if (inputs.updatePRTitleAndBody === "false") return;
+        await octokit.request(`POST /repos/{owner}/{repo}/pulls/{number}`, {
+          owner,
+          repo,
+          number: prInfo.number,
+          title: inputs.title,
+          body: inputs.body,
+        });
+        core.info(`PR title and body are updated`);
         return;
       }
     }
