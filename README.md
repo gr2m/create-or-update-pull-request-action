@@ -44,6 +44,7 @@ with:
   labels: label1, label2
   assignees: user1, user2
   auto-merge: squash
+  update-pull-request-title-and-body: false
 ```
 
 **Note:** `auto-merge` is optional. It can be set to `merge`, `squash`, or `rebase`. If [auto-merging](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) is disabled in the repository, a warning will be logged, but the action will not fail.
@@ -94,8 +95,8 @@ If there are changes, it does the following
 
 The actions outputs following properties:
 
- - `pull-request-number` - number of created/updated PR. Not set if result is `unchanged`.
- - `result` - `created`, `updated` or `unchanged` based if the PR was created, updated or if there were no local changes.
+- `pull-request-number` - number of created/updated PR. Not set if result is `unchanged`.
+- `result` - `created`, `updated` or `unchanged` based if the PR was created, updated or if there were no local changes.
 
 The action is written in JavaScript. [Learn how to create your own](https://help.github.com/en/articles/creating-a-javascript-action).
 

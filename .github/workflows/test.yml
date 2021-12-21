@@ -2,12 +2,10 @@ on:
   push:
     branches:
       - master
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - synchronize
-    branches:
-      - master
   workflow_dispatch: {}
 name: Test
 jobs:
@@ -53,12 +51,12 @@ jobs:
         with:
           title: Test pull request
           body: This pull request is part of the CI  - please ignore.
-          branch: test-create-new-pull-request
+          branch: test-create-new-pull-request-${{ github.run_number }}
           commit-message: "Just testing [skip ci]"
           author: "J. Doe <j@example.com>"
           labels: test1, test2
           assignees: gr2m
-      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request"
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ steps.run.outputs.result != 'created' }}
@@ -84,7 +82,7 @@ jobs:
         with:
           title: Test pull request with multiple commits
           body: This pull request is part of the CI  - please ignore.
-          branch: test-create-new-pull-request-with-multiple-commits
+          branch: test-create-new-pull-request-with-multiple-commits-${{ github.run_number }}
           author: "J. Doe <j@example.com>"
           path: file1.txt
           commit-message: "file 1 created [skip ci]"
@@ -95,7 +93,7 @@ jobs:
         with:
           title: Test pull request
           body: This pull request is part of the CI  - please ignore.
-          branch: test-create-new-pull-request-with-multiple-commits
+          branch: test-create-new-pull-request-with-multiple-commits-${{ github.run_number }}
           author: "J. Doe <j@example.com>"
           path: file2.txt
           commit-message: "file 2 created [skip ci]"
@@ -106,11 +104,11 @@ jobs:
         with:
           title: Test pull request
           body: This pull request is part of the CI  - please ignore.
-          branch: test-create-new-pull-request-with-multiple-commits
+          branch: test-create-new-pull-request-with-multiple-commits-${{ github.run_number }}
           author: "J. Doe <j@example.com>"
           path: does_not_exist.txt
           commit-message: "this should fail silently, not commit should be created"
-      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-with-multiple-commits"
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-create-new-pull-request-with-multiple-commits-${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -132,8 +130,8 @@ jobs:
           title: Test pull request for `auto-merge` option
           commit-message: "Testing auto-merge"
           auto-merge: squash
-          branch: test-auto-merge
-      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-auto-merge"
+          branch: test-auto-merge-${{ github.run_number }}
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-auto-merge-${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -155,3 +153,59 @@ jobs:
           ACTIONS_STEP_DEBUG: true
         with:
           commit-message: "Just testing [skip ci]"
+
+  updatePRTitleAndBody:
+    name: "[TEST] Update PR title and body"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - run: "date > test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Test pull request
+          body: This pull request is part of the CI  - please ignore.
+          branch: test-update-pr-title-and-body-${{ github.run_number }}
+          commit-message: "Just testing [skip ci]"
+      - run: "echo updated >> test.txt"
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Skipped Updated test pull request
+          body: This Skipped updated pull request is part of the CI  - please ignore.
+          branch: test-update-pr-title-and-body-${{ github.run_number }}
+          commit-message: "Just testing [skip ci]"
+      - run: "echo updated >> test.txt"
+      - uses: ./
+        id: run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Updated test pull request
+          body: This updated pull request is part of the CI  - please ignore.
+          branch: test-update-pr-title-and-body-${{ github.run_number }}
+          commit-message: "Just testing [skip ci]"
+          update-pull-request-title-and-body: true
+      - uses: octokit/request-action@v2.x
+        id: get-pull-request
+        with:
+          route: GET /repos/{owner}/{repo}/pulls/{pull_number}
+          owner: gr2m
+          repo: create-or-update-pull-request-action
+          pull_number: ${{ steps.run.outputs.pull-request-number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-update-pr-title-and-body-${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ fromJson(steps.get-pull-request.outputs.data).title != 'Updated test pull request' }}
+        run: 'echo "Pull request title is  \"${{ fromJson(steps.get-pull-request.outputs.data).title }}\" but expected \"Updated test pull request\"" && exit 1'
