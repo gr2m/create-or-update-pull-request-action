@@ -205,8 +205,8 @@ jobs:
           pull_number: ${{ steps.run.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ fromJson(steps.get-pull-request.outputs.data).title != 'Updated test pull request' }}
-        run: 'echo "Pull request title is  \"${{ fromJson(steps.get-pull-request.outputs.data).title }}\" but expected \"Updated test pull request\"" && exit 1'
       - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-update-pr-title-and-body"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ fromJson(steps.get-pull-request.outputs.data).title != 'Updated test pull request' }}
+        run: 'echo "Pull request title is  \"${{ fromJson(steps.get-pull-request.outputs.data).title }}\" but expected \"Updated test pull request\"" && exit 1'
