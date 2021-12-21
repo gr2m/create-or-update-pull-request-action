@@ -6,6 +6,8 @@ on:
     types:
       - opened
       - synchronize
+    branches:
+      - master
   workflow_dispatch: {}
 name: Test
 jobs:
