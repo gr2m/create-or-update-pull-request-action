@@ -224,24 +224,10 @@ async function main() {
       core.debug(inspect(data));
     }
   
-    if (inputs.reviewers) {
+    if (inputs.reviewers || inputs.team_reviewers) {
       core.debug(`Adding reviewers: ${inputs.reviewers}`);
-      const reviewers = inputs.reviewers.trim().split(/\s*,\s*/);
-      const { data } = await octokit.request(
-        `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
-        {
-          owner,
-          repo,
-          pull_number: number,
-          reviewers,
-        }
-      );
-      core.info(`Reviewers added: ${reviewers.join(", ")}`);
-      core.debug(inspect(data));
-    }
-
-    if (inputs.team_reviewers) {
       core.debug(`Adding team reviewers: ${inputs.team_reviewers}`);
+      const reviewers = inputs.reviewers.trim().split(/\s*,\s*/);
       const team_reviewers = inputs.team_reviewers.trim().split(/\s*,\s*/);
       const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
@@ -249,9 +235,11 @@ async function main() {
           owner,
           repo,
           pull_number: number,
+          reviewers,
           team_reviewers
         }
       );
+      core.info(`Reviewers added: ${reviewers.join(", ")}`);
       core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
       core.debug(inspect(data));
     }
