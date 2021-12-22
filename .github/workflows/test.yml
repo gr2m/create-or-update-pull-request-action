@@ -209,3 +209,39 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ fromJson(steps.get-pull-request.outputs.data).title != 'Updated test pull request' }}
         run: 'echo "Pull request title is  \"${{ fromJson(steps.get-pull-request.outputs.data).title }}\" but expected \"Updated test pull request\"" && exit 1'
+
+  addReviewers:
+    name: "[TEST] Add Reviewers"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - run: "date > test.txt"
+      - run: "npm ci"
+      - run: "npm run build"
+      - uses: ./
+        id: run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_STEP_DEBUG: true
+        with:
+          title: Test Add Reviewers
+          body: This pull request is part of the CI  - please ignore.
+          branch: test-add-reviewers-${{ github.run_number }}
+          commit-message: "Just testing [skip ci]"
+          reviewers: gr2m
+      - uses: octokit/request-action@v2.x
+        id: get-pull-request
+        with:
+          route: GET /repos/{owner}/{repo}/pulls/{pull_number}
+          owner: gr2m
+          repo: create-or-update-pull-request-action
+          pull_number: ${{ steps.run.outputs.pull-request-number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: "git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git :test-add-reviewers-${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ !contains(toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login), 'gr2m') }}
+        run: 'echo "Requested reviewers are \"${{ toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login) }}\" but expected \"[\n gr2m \n]\"" && exit 1'
