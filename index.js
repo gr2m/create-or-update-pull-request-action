@@ -235,7 +235,7 @@ async function main() {
 
       if(inputs.reviewers) { 
         core.debug(`Adding reviewers: ${inputs.reviewers}`) 
-        reviewers = (inputs.reviewers ?? "").trim().split(/\s*,\s*/);
+        reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
           ...params,
@@ -245,7 +245,7 @@ async function main() {
 
       if(inputs.team_reviewers) {
         core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
-        team_reviewers = (inputs.team_reviewers ?? "").trim().split(/\s*,\s*/);
+        team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
           ...params,
