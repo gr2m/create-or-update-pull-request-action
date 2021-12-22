@@ -44,6 +44,7 @@ with:
   labels: label1, label2
   assignees: user1, user2
   reviewers: user1, user2
+  team_reviewers: team1, team2
   auto-merge: squash
   update-pull-request-title-and-body: false
 ```

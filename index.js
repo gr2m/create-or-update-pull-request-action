@@ -53,6 +53,7 @@ async function main() {
       labels: core.getInput("labels"),
       assignees: core.getInput("assignees"),
       reviewers: core.getInput("reviewers"),
+      team_reviewers: core.getInput("team_reviewers"),
       autoMerge: core.getInput("auto-merge"),
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
     };
@@ -236,6 +237,22 @@ async function main() {
         }
       );
       core.info(`Reviewers added: ${reviewers.join(", ")}`);
+      core.debug(inspect(data));
+    }
+
+    if (inputs.team_reviewers) {
+      core.debug(`Adding team reviewers: ${inputs.team_reviewers}`);
+      const team_reviewers = inputs.team_reviewers.trim().split(/\s*,\s*/);
+      const { data } = await octokit.request(
+        `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
+        {
+          owner,
+          repo,
+          pull_number: number,
+          team_reviewers
+        }
+      );
+      core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
       core.debug(inspect(data));
     }
 
