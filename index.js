@@ -225,22 +225,47 @@ async function main() {
     }
   
     if (inputs.reviewers || inputs.team_reviewers) {
-      core.debug(`Adding reviewers: ${inputs.reviewers}`);
-      core.debug(`Adding team reviewers: ${inputs.team_reviewers}`);
-      const reviewers = inputs.reviewers.trim().split(/\s*,\s*/);
-      const team_reviewers = inputs.team_reviewers.trim().split(/\s*,\s*/);
-      const { data } = await octokit.request(
-        `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
-        {
-          owner,
-          repo,
-          pull_number: number,
-          reviewers,
+      let params = {
+        owner,
+        repo,
+        pull_number: number
+      }
+      let reviewers = null;
+      let team_reviewers = null;
+
+      if(inputs.reviewers) { 
+        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+        reviewers = (inputs.reviewers ?? "").trim().split(/\s*,\s*/);
+
+        params = {
+          ...params,
+          reviewers
+        }
+      };
+
+      if(inputs.team_reviewers) {
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+        team_reviewers = (inputs.team_reviewers ?? "").trim().split(/\s*,\s*/);
+
+        params = {
+          ...params,
           team_reviewers
         }
+      } ;
+
+      const { data } = await octokit.request(
+        `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
+        params
       );
-      core.info(`Reviewers added: ${reviewers.join(", ")}`);
-      core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
+
+      if(reviewers) {
+        core.info(`Reviewers added: ${reviewers.join(", ")}`);
+      }
+
+      if(team_reviewers) {
+        core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
+      }
+
       core.debug(inspect(data));
     }
 
