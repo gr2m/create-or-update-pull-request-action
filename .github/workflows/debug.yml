@@ -22,3 +22,4 @@ jobs:
           path: "test.txt"
           commit-message: "debug"
           author: "Gregor Martynus <39992+gr2m@users.noreply.github.com>"
+          reviewers: gr2m
