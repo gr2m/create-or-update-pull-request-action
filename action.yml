@@ -39,6 +39,9 @@ inputs:
   reviewers:
     description: Comma separated list of reviewers to apply to the pull request
     required: false
+  team_reviewers:
+    description: Comma separated list of team reviewers to apply to the pull request
+    required: false
   auto-merge:
     description: "Enable auto merge for pull request. Requires auto merging to be enabled in repository settings"
     required: false
