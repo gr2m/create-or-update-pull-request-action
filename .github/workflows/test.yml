@@ -246,5 +246,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ !contains(toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login), 'gr2m') }}
         run: 'echo "Requested reviewers are \"${{ toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login) }}\" but expected \"[\n gr2m \n]\"" && exit 1'
-      - if: ${{ !contains(toJson(fromJson(steps.get-pull-request.outputs.data).requested_teams.*.login), 'test-reviewers') }}
-        run: 'echo "Requested team reviewers are \"${{ toJson(fromJson(steps.get-pull-request.outputs.data).requested_teams.*.login) }}\" but expected \"[\n test-reviewers \n]\"" && exit 1'
