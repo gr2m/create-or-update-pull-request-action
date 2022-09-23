@@ -1,25 +1,22 @@
 name: debug
-on: workflow_dispatch
-
+"on": workflow_dispatch
 jobs:
   issue_245:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          ref: "debug"
-      # - run: date > test.txt
-      # - run: git add test.txt
-      - run: "npm ci"
-      - run: "npm run build"
+          ref: debug
+      - run: npm ci
+      - run: npm run build
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          title: "Debug"
+          title: Debug
           body: "debugging #245"
-          branch: "debug-issue-245"
-          path: "test.txt"
-          commit-message: "debug"
-          author: "Gregor Martynus <39992+gr2m@users.noreply.github.com>"
+          branch: debug-issue-245
+          path: test.txt
+          commit-message: debug
+          author: Gregor Martynus <39992+gr2m@users.noreply.github.com>
           reviewers: gr2m
