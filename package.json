@@ -14,7 +14,7 @@
   "author": "Gregor Martynus (https://twitter.com/gr2m)",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.10.0",
     "@octokit/core": "^3.5.1",
     "execa": "^2.0.4"
   },
