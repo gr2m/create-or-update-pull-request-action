@@ -109,6 +109,7 @@ The action is written in JavaScript. [Learn how to create your own](https://help
 - [@sinchang/cn-starbucks-stores-data](https://github.com/sinchang/cn-starbucks-stores-data/blob/master/.github/workflows/update.yml)
 - [`ergebnis/composer-normalize`](https://github.com/ergebnis/composer-normalize/blob/69ec6fd9a87cbb16badf2a988f4372221592b05e/.github/workflows/schema.yml#L25-L38)
 - [nodejs/node](https://github.com/nodejs/node/blob/master/.github/workflows/license-builder.yml)
+- [dreua/flatpak-module-qpdf-pikepdf: Flatpak modules for qpdf and pikepdf](https://github.com/dreua/flatpak-module-qpdf-pikepdf)
 
 Please send a pull request to add yours :)
 
