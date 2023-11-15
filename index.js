@@ -15,7 +15,7 @@ async function main() {
   if (!process.env.GITHUB_TOKEN) {
     core.setFailed(
       `GITHUB_TOKEN is not configured. Make sure you made it available to your action
-  
+
   uses: gr2m/create-or-update-pull-request-action@master
   env:
     GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
@@ -78,6 +78,11 @@ async function main() {
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
+
+    if (inputs.path) {
+      core.debug(`Changing directory to ${inputs.path}`);
+      await runShellCommand(`cd ${inputs.path}`);
+    }
 
     const { hasChanges } = await getLocalChanges(inputs.path);
 
@@ -223,7 +228,7 @@ async function main() {
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
-  
+
     if (inputs.reviewers || inputs.team_reviewers) {
       let params = {
         owner,
@@ -233,8 +238,8 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) { 
-        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+      if(inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
@@ -244,7 +249,7 @@ async function main() {
       };
 
       if(inputs.team_reviewers) {
-        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
