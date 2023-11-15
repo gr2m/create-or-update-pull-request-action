@@ -746,7 +746,7 @@ async function main() {
     } else {
       core.debug(`rebase all local changes on base branch`);
       await runShellCommand(
-        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
+        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
       );
       await runShellCommand(`git stash --include-untracked`);
       await runShellCommand(`git rebase -X theirs '${DEFAULT_BRANCH}'`);
@@ -757,11 +757,11 @@ async function main() {
 
     core.debug(`Pushing local changes`);
     await runShellCommand(
-      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`
+      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git HEAD:refs/heads/${inputs.branch}`
     );
 
     if (remoteBranchExists) {
-      const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
+      const q = `head:${inputs.branch} type:pr is:open repo:${owner}/${repo}`;
       const { data } = await octokit.request("GET /search/issues", {
         q,
       });
@@ -964,7 +964,7 @@ async function checkOutRemoteBranch(branch) {
 
     core.debug(`fetching "${branch}" branch from remote`);
     await runShellCommand(
-      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${branch}:${branch}`
     );
 
     await runShellCommand(`git branch`);
