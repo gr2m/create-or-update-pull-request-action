@@ -85,7 +85,9 @@ async function main() {
 
     if (inputs.path) {
       core.debug(`Changing directory to ${inputs.path}`);
-      await runShellCommand(`cd ${inputs.path}`);
+      process.chdir(inputs.path);
+      console.log("running pwd");
+      await runShellCommand(`pwd`);
     }
 
     const { hasChanges } = await getLocalChanges();
