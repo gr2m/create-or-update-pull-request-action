@@ -59,7 +59,7 @@ async function main() {
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
-    const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+    let [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
     if (inputs.repository) {
       [owner, repo] = inputs.repository.split("/");
     }
