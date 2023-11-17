@@ -703,12 +703,14 @@ async function main() {
     }
 
     const { hasChanges } = await getLocalChanges(inputs.path);
+
     if (!hasChanges) {
       if (inputs.path) {
         core.info(`No local changes matching "${inputs.path}"`);
       } else {
         core.info("No local changes");
       }
+      core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
 
@@ -853,7 +855,7 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) {
+      if (inputs.reviewers) {
         core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
@@ -863,7 +865,7 @@ async function main() {
         }
       };
 
-      if(inputs.team_reviewers) {
+      if (inputs.team_reviewers) {
         core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
@@ -871,18 +873,18 @@ async function main() {
           ...params,
           team_reviewers
         }
-      } ;
+      };
 
       const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
         params
       );
 
-      if(reviewers) {
+      if (reviewers) {
         core.info(`Reviewers added: ${reviewers.join(", ")}`);
       }
 
-      if(team_reviewers) {
+      if (team_reviewers) {
         core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
       }
 

@@ -92,12 +92,14 @@ async function main() {
     }
 
     const { hasChanges } = await getLocalChanges(inputs.path);
+
     if (!hasChanges) {
       if (inputs.path) {
         core.info(`No local changes matching "${inputs.path}"`);
       } else {
         core.info("No local changes");
       }
+      core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
 
