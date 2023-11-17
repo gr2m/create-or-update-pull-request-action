@@ -47,6 +47,7 @@ async function main() {
       body: core.getInput("body"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
+      pathToCdTo: core.getInput("path-to-cd-to"),
       repository: core.getInput("repository"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
@@ -83,18 +84,20 @@ async function main() {
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
-    if (inputs.path) {
-      core.debug(`Changing directory to ${inputs.path}`);
-      process.chdir(inputs.path);
+    if (inputs.pathToCdTo) {
+      core.debug(`Changing directory to ${inputs.pathToCdTo}`);
+      process.chdir(inputs.pathToCdTo);
       console.log("running pwd");
       await runShellCommand(`pwd`);
     }
 
-    const { hasChanges } = await getLocalChanges();
-
+    const { hasChanges } = await getLocalChanges(inputs.path);
     if (!hasChanges) {
-      core.info("No local changes");
-      core.setOutput("result", "unchanged");
+      if (inputs.path) {
+        core.info(`No local changes matching "${inputs.path}"`);
+      } else {
+        core.info("No local changes");
+      }
       process.exit(0); // there is currently no neutral exit code
     }
 
@@ -119,8 +122,13 @@ async function main() {
       });
     }
 
-    core.debug(`Committing all local changes`);
-    await runShellCommand("git add .");
+    if (inputs.path) {
+      core.debug(`Committing local changes matching "${inputs.path}"`);
+      await runShellCommand(`git add "${inputs.path}"`);
+    } else {
+      core.debug(`Committing all local changes`);
+      await runShellCommand("git add .");
+    }
 
     await runShellCommand(
       `git commit -m '${inputs.commitMessage}' --author '${inputs.author}'`
@@ -234,7 +242,7 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) {
+      if (inputs.reviewers) {
         core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
@@ -244,7 +252,7 @@ async function main() {
         }
       };
 
-      if(inputs.team_reviewers) {
+      if (inputs.team_reviewers) {
         core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
@@ -252,18 +260,18 @@ async function main() {
           ...params,
           team_reviewers
         }
-      } ;
+      };
 
       const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
         params
       );
 
-      if(reviewers) {
+      if (reviewers) {
         core.info(`Reviewers added: ${reviewers.join(", ")}`);
       }
 
-      if(team_reviewers) {
+      if (team_reviewers) {
         core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
       }
 
@@ -302,8 +310,8 @@ async function main() {
   }
 }
 
-async function getLocalChanges() {
-  const output = await runShellCommand(`git status`);
+async function getLocalChanges(path) {
+  const output = await runShellCommand(`git status ${path}`);
 
   if (/nothing to commit, working tree clean/i.test(output)) {
     return {};
