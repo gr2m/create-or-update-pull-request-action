@@ -671,6 +671,7 @@ async function main() {
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
+
     let [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
     if (inputs.repository) {
       [owner, repo] = inputs.repository.split("/");
@@ -698,8 +699,6 @@ async function main() {
     if (inputs.pathToCdTo) {
       core.debug(`Changing directory to ${inputs.pathToCdTo}`);
       process.chdir(inputs.pathToCdTo);
-      console.log("running pwd");
-      await runShellCommand(`pwd`);
     }
 
     const { hasChanges } = await getLocalChanges(inputs.path);
@@ -710,6 +709,7 @@ async function main() {
       } else {
         core.info("No local changes");
       }
+
       core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
