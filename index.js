@@ -15,7 +15,7 @@ async function main() {
   if (!process.env.GITHUB_TOKEN) {
     core.setFailed(
       `GITHUB_TOKEN is not configured. Make sure you made it available to your action
-  
+
   uses: gr2m/create-or-update-pull-request-action@master
   env:
     GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
@@ -40,7 +40,6 @@ async function main() {
     auth: process.env.GITHUB_TOKEN,
   });
 
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
   try {
     const inputs = {
@@ -48,6 +47,8 @@ async function main() {
       body: core.getInput("body"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
+      pathToCdTo: core.getInput("path-to-cd-to"),
+      repository: core.getInput("repository"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
       labels: core.getInput("labels"),
@@ -59,6 +60,11 @@ async function main() {
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
+
+    let [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+    if (inputs.repository) {
+      [owner, repo] = inputs.repository.split("/");
+    }
 
     if (
       inputs.autoMerge &&
@@ -78,6 +84,11 @@ async function main() {
     });
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
+
+    if (inputs.pathToCdTo) {
+      core.debug(`Changing directory to ${inputs.pathToCdTo}`);
+      process.chdir(inputs.pathToCdTo);
+    }
 
     const { hasChanges } = await getLocalChanges(inputs.path);
 
@@ -134,7 +145,7 @@ async function main() {
     } else {
       core.debug(`rebase all local changes on base branch`);
       await runShellCommand(
-        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
+        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
       );
       await runShellCommand(`git stash --include-untracked`);
       await runShellCommand(`git rebase -X theirs '${DEFAULT_BRANCH}'`);
@@ -145,11 +156,11 @@ async function main() {
 
     core.debug(`Pushing local changes`);
     await runShellCommand(
-      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git HEAD:refs/heads/${inputs.branch}`
+      `git push -f https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git HEAD:refs/heads/${inputs.branch}`
     );
 
     if (remoteBranchExists) {
-      const q = `head:${inputs.branch} type:pr is:open repo:${process.env.GITHUB_REPOSITORY}`;
+      const q = `head:${inputs.branch} type:pr is:open repo:${owner}/${repo}`;
       const { data } = await octokit.request("GET /search/issues", {
         q,
       });
@@ -223,7 +234,7 @@ async function main() {
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
-  
+
     if (inputs.reviewers || inputs.team_reviewers) {
       let params = {
         owner,
@@ -233,8 +244,8 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) { 
-        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+      if (inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
@@ -243,26 +254,26 @@ async function main() {
         }
       };
 
-      if(inputs.team_reviewers) {
-        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+      if (inputs.team_reviewers) {
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
           ...params,
           team_reviewers
         }
-      } ;
+      };
 
       const { data } = await octokit.request(
         `POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers`,
         params
       );
 
-      if(reviewers) {
+      if (reviewers) {
         core.info(`Reviewers added: ${reviewers.join(", ")}`);
       }
 
-      if(team_reviewers) {
+      if (team_reviewers) {
         core.info(`Team reviewers added: ${team_reviewers.join(", ")}`);
       }
 
@@ -352,7 +363,7 @@ async function checkOutRemoteBranch(branch) {
 
     core.debug(`fetching "${branch}" branch from remote`);
     await runShellCommand(
-      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${branch}:${branch}`
+      `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${branch}:${branch}`
     );
 
     await runShellCommand(`git branch`);
