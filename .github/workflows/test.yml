@@ -12,6 +12,9 @@ jobs:
   happyPath:
     name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
