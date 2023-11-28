@@ -110,7 +110,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: file1.txt
           commit-message: file 1 created [skip ci]
       - uses: ./
         env:
@@ -123,7 +122,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: file2.txt
           commit-message: file 2 created [skip ci]
       - uses: ./
         env:
@@ -136,7 +134,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: does_not_exist.txt
           commit-message: this should fail silently, not commit should be created
       - run: >-
           git push
