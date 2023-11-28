@@ -68,7 +68,7 @@ jobs:
           commit-message: Just testing [skip ci]
           author: J. Doe <j@example.com>
           labels: test1, test2
-          assignees: gr2m
+          assignees: kfcampbell
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
@@ -242,7 +242,7 @@ jobs:
         id: get-pull-request
         with:
           route: GET /repos/{owner}/{repo}/pulls/{pull_number}
-          owner: gr2m
+          owner: kfcampbell
           repo: create-or-update-pull-request-action
           pull_number: ${{ steps.run.outputs.pull-request-number }}
         env:
@@ -284,13 +284,13 @@ jobs:
           body: This pull request is part of the CI  - please ignore.
           branch: test-add-reviewers-${{ github.run_number }}
           commit-message: Just testing [skip ci]
-          reviewers: gr2m
+          reviewers: kfcampbell
           team_reviewers: test-reviewers
       - uses: octokit/request-action@v2.x
         id: get-pull-request
         with:
           route: GET /repos/{owner}/{repo}/pulls/{pull_number}
-          owner: gr2m
+          owner: kfcampbell
           repo: create-or-update-pull-request-action
           pull_number: ${{ steps.run.outputs.pull-request-number }}
         env:
@@ -304,8 +304,8 @@ jobs:
       - if: >-
           ${{
           !contains(toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login),
-          'gr2m') }}
+          'kfcampbell') }}
         run: >-
           echo "Requested reviewers are \"${{
           toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login)
-          }}\" but expected \"[\n gr2m \n]\"" && exit 1
+          }}\" but expected \"[\n kfcampbell \n]\"" && exit 1
