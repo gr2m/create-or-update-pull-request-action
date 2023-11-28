@@ -285,7 +285,6 @@ jobs:
           branch: test-add-reviewers-${{ github.run_number }}
           commit-message: Just testing [skip ci]
           reviewers: kfcampbell
-          team_reviewers: test-reviewers
       - uses: octokit/request-action@v2.x
         id: get-pull-request
         with:
