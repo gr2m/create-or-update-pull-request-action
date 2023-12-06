@@ -12,6 +12,9 @@ jobs:
   happyPath:
     name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -120,8 +123,8 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: file2.txt
           commit-message: file 2 created [skip ci]
+          path: file2.txt
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -133,8 +136,8 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: does_not_exist.txt
           commit-message: this should fail silently, not commit should be created
+          path: does_not_exist.txt
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
