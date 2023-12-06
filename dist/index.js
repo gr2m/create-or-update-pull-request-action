@@ -752,7 +752,7 @@ async function main() {
     }
 
     core.debug(`Try to fetch and checkout remote branch "${inputs.branch}"`);
-    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch);
+    const remoteBranchExists = await checkOutRemoteBranch(inputs.branch, owner, repo);
 
     core.debug(`Pushing local changes`);
     await runShellCommand(
@@ -950,7 +950,7 @@ async function setGitUser({ name, email }) {
   await runShellCommand(`git config --global user.email '${email}'`);
 }
 
-async function checkOutRemoteBranch(branch) {
+async function checkOutRemoteBranch(branch, owner, repo) {
   try {
     const currentBranch = await runShellCommand(
       `git rev-parse --abbrev-ref HEAD`
