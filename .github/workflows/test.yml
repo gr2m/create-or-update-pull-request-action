@@ -110,6 +110,7 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
+          path: file1.txt
           commit-message: file 1 created [skip ci]
       - uses: ./
         env:
@@ -123,6 +124,7 @@ jobs:
             github.run_number }}
           author: J. Doe <j@example.com>
           commit-message: file 2 created [skip ci]
+          path: file2.txt
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,6 +137,7 @@ jobs:
             github.run_number }}
           author: J. Doe <j@example.com>
           commit-message: this should fail silently, not commit should be created
+          path: does_not_exist.txt
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
@@ -285,6 +288,7 @@ jobs:
           branch: test-add-reviewers-${{ github.run_number }}
           commit-message: Just testing [skip ci]
           reviewers: gr2m
+          team_reviewers: test-reviewers
       - uses: octokit/request-action@v2.x
         id: get-pull-request
         with:

@@ -46,6 +46,7 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
+      path: core.getInput("path"),
       pathToCdTo: core.getInput("path-to-cd-to"),
       repository: core.getInput("repository"),
       commitMessage: core.getInput("commit-message"),
@@ -89,10 +90,14 @@ async function main() {
       process.chdir(inputs.pathToCdTo);
     }
 
-    const { hasChanges } = await getLocalChanges();
+    const { hasChanges } = await getLocalChanges(inputs.path);
 
     if (!hasChanges) {
-      core.info("No local changes");
+      if (inputs.path) {
+        core.info(`No local changes matching "${inputs.path}"`);
+      } else {
+        core.info("No local changes");
+      }
       core.setOutput("result", "unchanged");
       process.exit(0); // there is currently no neutral exit code
     }
@@ -118,8 +123,15 @@ async function main() {
       });
     }
 
-    core.debug(`Committing all local changes`);
-    await runShellCommand("git add .");
+    if (inputs.path) {
+      if (inputs.path) {
+        core.debug(`Committing local changes matching "${inputs.path}"`);
+        await runShellCommand(`git add "${inputs.path}"`);
+      } else {
+        core.debug(`Committing all local changes`);
+        await runShellCommand("git add .");
+      }
+    }
 
     await runShellCommand(
       `git commit -m '${inputs.commitMessage}' --author '${inputs.author}'`
@@ -301,8 +313,8 @@ async function main() {
   }
 }
 
-async function getLocalChanges() {
-  const output = await runShellCommand(`git status`);
+async function getLocalChanges(path) {
+  const output = await runShellCommand(`git status ${path}`);
 
   if (/nothing to commit, working tree clean/i.test(output)) {
     return {};
