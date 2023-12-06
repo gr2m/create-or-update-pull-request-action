@@ -735,11 +735,11 @@ async function main() {
     }
 
     if (inputs.path) {
-        core.debug(`Committing local changes matching "${inputs.path}"`);
-        await runShellCommand(`git add "${inputs.path}"`);
-      } else {
-        core.debug(`Committing all local changes`);
-        await runShellCommand("git add .");
+      core.debug(`Committing local changes matching "${inputs.path}"`);
+      await runShellCommand(`git add "${inputs.path}"`);
+    } else {
+      core.debug(`Committing all local changes`);
+      await runShellCommand("git add .");
     }
 
     await runShellCommand(
