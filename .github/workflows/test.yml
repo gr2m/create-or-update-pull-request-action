@@ -12,6 +12,9 @@ jobs:
   happyPath:
     name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -65,7 +68,7 @@ jobs:
           commit-message: Just testing [skip ci]
           author: J. Doe <j@example.com>
           labels: test1, test2
-          assignees: gr2m
+          assignees: kfcampbell
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
@@ -107,7 +110,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: file1.txt
           commit-message: file 1 created [skip ci]
       - uses: ./
         env:
@@ -120,7 +122,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: file2.txt
           commit-message: file 2 created [skip ci]
       - uses: ./
         env:
@@ -133,7 +134,6 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          path: does_not_exist.txt
           commit-message: this should fail silently, not commit should be created
       - run: >-
           git push
@@ -242,7 +242,7 @@ jobs:
         id: get-pull-request
         with:
           route: GET /repos/{owner}/{repo}/pulls/{pull_number}
-          owner: gr2m
+          owner: kfcampbell
           repo: create-or-update-pull-request-action
           pull_number: ${{ steps.run.outputs.pull-request-number }}
         env:
@@ -284,13 +284,12 @@ jobs:
           body: This pull request is part of the CI  - please ignore.
           branch: test-add-reviewers-${{ github.run_number }}
           commit-message: Just testing [skip ci]
-          reviewers: gr2m
-          team_reviewers: test-reviewers
+          reviewers: kfcampbell
       - uses: octokit/request-action@v2.x
         id: get-pull-request
         with:
           route: GET /repos/{owner}/{repo}/pulls/{pull_number}
-          owner: gr2m
+          owner: kfcampbell
           repo: create-or-update-pull-request-action
           pull_number: ${{ steps.run.outputs.pull-request-number }}
         env:
@@ -304,8 +303,8 @@ jobs:
       - if: >-
           ${{
           !contains(toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login),
-          'gr2m') }}
+          'kfcampbell') }}
         run: >-
           echo "Requested reviewers are \"${{
           toJson(fromJson(steps.get-pull-request.outputs.data).requested_reviewers.*.login)
-          }}\" but expected \"[\n gr2m \n]\"" && exit 1
+          }}\" but expected \"[\n kfcampbell \n]\"" && exit 1
