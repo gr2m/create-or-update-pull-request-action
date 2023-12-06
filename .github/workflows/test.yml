@@ -123,8 +123,8 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          commit-message: file 2 created [skip ci]
           path: file2.txt
+          commit-message: file 2 created [skip ci]
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,8 +136,8 @@ jobs:
             test-create-new-pull-request-with-multiple-commits-${{
             github.run_number }}
           author: J. Doe <j@example.com>
-          commit-message: this should fail silently, not commit should be created
           path: does_not_exist.txt
+          commit-message: this should fail silently, not commit should be created
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
