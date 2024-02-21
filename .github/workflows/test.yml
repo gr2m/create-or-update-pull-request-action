@@ -13,12 +13,12 @@ jobs:
     name: "[TEST] Update existing pull request"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > test.txt
       - run: npm ci
@@ -43,12 +43,12 @@ jobs:
     name: "[TEST] Create new pull request"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > test.txt
       - run: npm ci
@@ -85,12 +85,12 @@ jobs:
     name: "[TEST] Create multiple commits"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > file1.txt
       - run: date > file2.txt
@@ -146,12 +146,12 @@ jobs:
     name: "[TEST] Auto merge"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > test.txt
       - run: npm ci
@@ -175,12 +175,12 @@ jobs:
     name: "[TEST] Create or update pull request for hidden file"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > .github/test.txt
       - run: npm ci
@@ -195,12 +195,12 @@ jobs:
     name: "[TEST] Update PR title and body"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > test.txt
       - run: npm ci
@@ -264,12 +264,12 @@ jobs:
     name: "[TEST] Add Reviewers"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - run: date > test.txt
       - run: npm ci
