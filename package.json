@@ -19,6 +19,6 @@
     "execa": "^2.0.4"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.22.3"
+    "@vercel/ncc": "^0.38.1"
   }
 }
