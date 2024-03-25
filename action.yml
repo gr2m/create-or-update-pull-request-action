@@ -27,14 +27,17 @@ inputs:
     description: Commit message for all uncommited changes.
     required: true
     default: Update from 'Create or Update Request' action
-  path:
-    description: Commit selected files only by providing a path. It is used in `git add "<path>"`
+  path-to-cd-to:
+    description: Commit changes in another repository by providing a path to cd to (using Node's process.chdir function) before git operations.
     required: false
   labels:
     description: Comma separated list of labels to apply to the pull request
     required: false
   assignees:
     description: Comma separated list of assignees to apply to the pull request
+    required: false
+  repository:
+    description: Repository name in the format owner/repo. Defaults to current repository if not given. Use with path-to-cd-to.
     required: false
   reviewers:
     description: Comma separated list of reviewers to apply to the pull request
