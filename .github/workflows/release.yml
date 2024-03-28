@@ -13,7 +13,6 @@ jobs:
         with:
           app-id: ${{ vars.GR2M_SEMANTIC_RELEASE_ID }}
           private-key: ${{ secrets.GR2M_SEMANTIC_RELEASE_PRIVATE_KEY }}
-          github-api-url: "https://github.acme-inc.com/api/v3"
       - uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
