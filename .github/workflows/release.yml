@@ -8,7 +8,15 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GR2M_SEMANTIC_RELEASE_ID }}
+          private-key: ${{ secrets.GR2M_SEMANTIC_RELEASE_PRIVATE_KEY }}
+          github-api-url: "https://github.acme-inc.com/api/v3"
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -20,8 +28,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name gr2m-semantic-release[bot]
+          git config user.email gr2m-semantic-release[bot]@users.noreply.github.com
           git add .gitignore dist/
           git commit -m "build"
       - run: >-
