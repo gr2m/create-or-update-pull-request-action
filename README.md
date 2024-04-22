@@ -120,3 +120,5 @@ Inspired by the [Create Pull Request action](https://github.com/peter-evans/crea
 ## License
 
 [MIT](LICENSE)
+
+Check 1, 2
