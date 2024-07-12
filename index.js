@@ -78,7 +78,30 @@ async function main() {
     }
 
     let baseBranch = inputs.baseBranch;
-    if (!baseBranch) {
+    if (baseBranch) {
+      // check if given base branch exists on remote and create it if not
+      try {
+        await octokit.request(`GET /repos/{owner}/{repo}/branches/{branch}`, {
+          owner,
+          repo,
+          branch: baseBranch,
+        });
+      } catch (error) {
+        if (error.status === 404) {
+          core.debug(`Base branch "${baseBranch}" does not exist yet`);
+          core.debug(`Creating base branch "${baseBranch}"`);
+          await octokit.request(`POST /repos/{owner}/{repo}/git/refs`, {
+            owner,
+            repo,
+            ref: `refs/heads/${baseBranch}`,
+            sha: process.env.GITHUB_SHA,
+          });
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      // no base branch provided so use repo's default branch
       const {
         data: { default_branch },
       } = await octokit.request(`GET /repos/{owner}/{repo}`, {
