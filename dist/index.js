@@ -688,10 +688,23 @@ async function main() {
       process.exit(1);
     }
 
+    // get the repo's default branch as we need it for multiple possible branching
+    // scenarios below: if the base branch is not provided and if it does not exist
+    const {
+      data: { default_branch },
+    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
+      owner,
+      repo,
+    });
+
     let baseBranch = inputs.baseBranch;
     if (baseBranch) {
-      // check if given base branch exists on remote and create it if not
+      // check if given base branch exists on remote and create it if necessary.
+      // we use the default branch SHA as the base branch SHA so that the
+      // rest of the PR workflow may proceed like normal.
       try {
+        // if this request succeeds, the base branch succeeds and we can proceed
+        // with the rest of the workflow
         await octokit.request(`GET /repos/{owner}/{repo}/branches/{branch}`, {
           owner,
           repo,
@@ -701,11 +714,19 @@ async function main() {
         if (error.status === 404) {
           core.debug(`Base branch "${baseBranch}" does not exist yet`);
           core.debug(`Creating base branch "${baseBranch}"`);
+
+          const { data: branchData } = await octokit.request(`GET /repos/{owner}/{repo}/branches/{branch}`, {
+            owner,
+            repo,
+            branch: default_branch,
+          });
+          const latestSHA = branchData.commit.sha;
+
           await octokit.request(`POST /repos/{owner}/{repo}/git/refs`, {
             owner,
             repo,
             ref: `refs/heads/${baseBranch}`,
-            sha: process.env.GITHUB_SHA,
+            sha: latestSHA,
           });
         } else {
           throw error;
@@ -713,12 +734,6 @@ async function main() {
       }
     } else {
       // no base branch provided so use repo's default branch
-      const {
-        data: { default_branch },
-      } = await octokit.request(`GET /repos/{owner}/{repo}`, {
-        owner,
-        repo,
-      });
       baseBranch = default_branch;
       core.debug(`Base branch not provided. Using default branch: ${baseBranch}`);
     }
