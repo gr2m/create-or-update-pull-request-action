@@ -656,6 +656,7 @@ async function main() {
     const inputs = {
       title: core.getInput("title"),
       body: core.getInput("body"),
+      baseBranch: core.getInput("base-branch"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       pathToCdTo: core.getInput("path-to-cd-to"),
@@ -687,14 +688,17 @@ async function main() {
       process.exit(1);
     }
 
-    const {
-      data: { default_branch },
-    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
-      owner,
-      repo,
-    });
-    const DEFAULT_BRANCH = default_branch;
-    core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
+    let baseBranch = inputs.baseBranch;
+    if (!baseBranch) {
+      const {
+        data: { default_branch },
+      } = await octokit.request(`GET /repos/{owner}/{repo}`, {
+        owner,
+        repo,
+      });
+      baseBranch = default_branch;
+      core.debug(`Base branch not provided. Using default branch: ${baseBranch}`);
+    }
 
     if (inputs.pathToCdTo) {
       core.debug(`Changing directory to ${inputs.pathToCdTo}`);
@@ -750,15 +754,15 @@ async function main() {
       `git rev-parse --abbrev-ref HEAD`
     );
 
-    if (currentBranch === DEFAULT_BRANCH) {
+    if (currentBranch === baseBranch) {
       core.info(`Already in base branch "${currentBranch}".`);
     } else {
       core.debug(`rebase all local changes on base branch`);
       await runShellCommand(
-        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`
+        `git fetch https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/${owner}/${repo}.git ${baseBranch}:${baseBranch}`
       );
       await runShellCommand(`git stash --include-untracked`);
-      await runShellCommand(`git rebase -X theirs '${DEFAULT_BRANCH}'`);
+      await runShellCommand(`git rebase -X theirs '${baseBranch}'`);
     }
 
     core.debug(`Try to fetch and checkout remote branch "${inputs.branch}"`);
@@ -805,7 +809,7 @@ async function main() {
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
-      base: DEFAULT_BRANCH,
+      base: baseBranch,
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
