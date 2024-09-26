@@ -49,6 +49,10 @@ inputs:
     description: "Set to true if you want the title and body to be updated for an existing pull request"
     default: "false"
     required: false
+  create-pull-request:
+    description: "Set to false if you want to skip creating a pull request"
+    default: "true"
+    required: false
 
 outputs:
   pull-request-number:

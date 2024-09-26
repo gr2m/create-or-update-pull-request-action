@@ -56,6 +56,7 @@ async function main() {
       team_reviewers: core.getInput("team_reviewers"),
       autoMerge: core.getInput("auto-merge"),
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
+      createPullRequest: core.getInput("create-pull-request"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -175,22 +176,24 @@ async function main() {
       }
     }
 
-    core.debug(`Creating pull request`);
-    const {
-      data: { html_url, number, node_id },
-    } = await octokit.request(`POST /repos/{owner}/{repo}/pulls`, {
-      owner,
-      repo,
-      title: inputs.title,
-      body: inputs.body,
-      head: inputs.branch,
-      base: DEFAULT_BRANCH,
-    });
+    if(inputs.createPullRequest) {
+      core.debug(`Creating pull request`);
+      const {
+        data: {html_url, number, node_id},
+      } = await octokit.request(`POST /repos/{owner}/{repo}/pulls`, {
+        owner,
+        repo,
+        title: inputs.title,
+        body: inputs.body,
+        head: inputs.branch,
+        base: DEFAULT_BRANCH,
+      });
 
-    core.info(`Pull request created: ${html_url} (#${number})`);
+      core.info(`Pull request created: ${html_url} (#${number})`);
 
-    core.setOutput(`pull-request-number`, number);
-    core.setOutput(`result`, `created`);
+      core.setOutput(`pull-request-number`, number);
+      core.setOutput(`result`, `created`);
+    }
 
     if (inputs.labels) {
       core.debug(`Adding labels: ${inputs.labels}`);
@@ -223,7 +226,7 @@ async function main() {
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
-  
+
     if (inputs.reviewers || inputs.team_reviewers) {
       let params = {
         owner,
@@ -233,8 +236,8 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) { 
-        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+      if(inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
@@ -244,7 +247,7 @@ async function main() {
       };
 
       if(inputs.team_reviewers) {
-        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
