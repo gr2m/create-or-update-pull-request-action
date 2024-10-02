@@ -56,6 +56,7 @@ async function main() {
       team_reviewers: core.getInput("team_reviewers"),
       autoMerge: core.getInput("auto-merge"),
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
+      draft: core.getInput("draft"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -185,6 +186,7 @@ async function main() {
       body: inputs.body,
       head: inputs.branch,
       base: DEFAULT_BRANCH,
+      draft: inputs.draft === "true",
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
@@ -223,7 +225,7 @@ async function main() {
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
-  
+
     if (inputs.reviewers || inputs.team_reviewers) {
       let params = {
         owner,
@@ -233,8 +235,8 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) { 
-        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+      if(inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
@@ -244,7 +246,7 @@ async function main() {
       };
 
       if(inputs.team_reviewers) {
-        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
