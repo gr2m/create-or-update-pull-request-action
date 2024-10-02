@@ -10572,9 +10572,22 @@ const handleOutput = (options, value, error) => {
 	return value;
 };
 
-const execa = (file, args, options) => {
-	const parsed = handleArgs(file, args, options);
-	const command = joinCommand(file, args);
+  try {
+    const inputs = {
+      title: core.getInput("title"),
+      body: core.getInput("body"),
+      branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
+      path: core.getInput("path"),
+      commitMessage: core.getInput("commit-message"),
+      author: core.getInput("author"),
+      labels: core.getInput("labels"),
+      assignees: core.getInput("assignees"),
+      reviewers: core.getInput("reviewers"),
+      team_reviewers: core.getInput("team_reviewers"),
+      autoMerge: core.getInput("auto-merge"),
+      updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
+      draft: core.getInput("draft"),
+    };
 
 	let spawned;
 	try {
@@ -10686,16 +10699,18 @@ module.exports.sync = (file, args, options) => {
 	result.stdout = handleOutput(parsed.options, result.stdout, result.error);
 	result.stderr = handleOutput(parsed.options, result.stderr, result.error);
 
-	if (result.error || result.status !== 0 || result.signal !== null) {
-		const error = makeError({
-			...result,
-			code: result.status,
-			command,
-			parsed,
-			timedOut: result.error && result.error.code === 'ETIMEDOUT',
-			isCanceled: false,
-			killed: result.signal !== null
-		});
+    core.debug(`Creating pull request`);
+    const {
+      data: { html_url, number, node_id },
+    } = await octokit.request(`POST /repos/{owner}/{repo}/pulls`, {
+      owner,
+      repo,
+      title: inputs.title,
+      body: inputs.body,
+      head: inputs.branch,
+      base: DEFAULT_BRANCH,
+      draft: inputs.draft === "true",
+    });
 
 		if (!parsed.options.reject) {
 			return error;
@@ -10717,15 +10732,34 @@ module.exports.sync = (file, args, options) => {
 	};
 };
 
-module.exports.command = (command, options) => {
-	const [file, ...args] = parseCommand(command);
-	return execa(file, args, options);
-};
+    if (inputs.assignees) {
+      core.debug(`Adding assignees: ${inputs.assignees}`);
+      const assignees = inputs.assignees.trim().split(/\s*,\s*/);
+      const { data } = await octokit.request(
+        `POST /repos/{owner}/{repo}/issues/{issue_number}/assignees`,
+        {
+          owner,
+          repo,
+          issue_number: number,
+          assignees,
+        }
+      );
+      core.info(`Assignees added: ${assignees.join(", ")}`);
+      core.debug(inspect(data));
+    }
 
-module.exports.commandSync = (command, options) => {
-	const [file, ...args] = parseCommand(command);
-	return execa.sync(file, args, options);
-};
+    if (inputs.reviewers || inputs.team_reviewers) {
+      let params = {
+        owner,
+        repo,
+        pull_number: number
+      }
+      let reviewers = null;
+      let team_reviewers = null;
+
+      if(inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
+        reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
 module.exports.node = (scriptPath, args, options = {}) => {
 	if (args && !Array.isArray(args) && typeof args === 'object') {
@@ -10733,7 +10767,9 @@ module.exports.node = (scriptPath, args, options = {}) => {
 		args = [];
 	}
 
-	const stdio = normalizeStdio.node(options);
+      if(inputs.team_reviewers) {
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
+        team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
 	const {nodePath = process.execPath, nodeOptions = process.execArgv} = options;
 
