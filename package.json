@@ -1,7 +1,7 @@
 {
   "name": "create-or-update-pull-request-action",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "A GitHub Action to create or update a pull request based on local changes",
   "main": "index.js",
   "scripts": {
