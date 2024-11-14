@@ -15,7 +15,7 @@ async function main() {
   if (!process.env.GITHUB_TOKEN) {
     core.setFailed(
       `GITHUB_TOKEN is not configured. Make sure you made it available to your action
-  
+
   uses: gr2m/create-or-update-pull-request-action@master
   env:
     GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
@@ -35,10 +35,6 @@ async function main() {
     );
     return;
   }
-
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
-  });
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
@@ -70,15 +66,6 @@ async function main() {
       );
       process.exit(1);
     }
-
-    const {
-      data: { default_branch },
-    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
-      owner,
-      repo,
-    });
-    const DEFAULT_BRANCH = default_branch;
-    core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
     const { hasChanges } = await getLocalChanges(inputs.path);
 
@@ -129,6 +116,19 @@ async function main() {
     const currentBranch = await runShellCommand(
       `git rev-parse --abbrev-ref HEAD`
     );
+
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    });
+
+    const {
+      data: { default_branch },
+    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
+      owner,
+      repo,
+    });
+    const DEFAULT_BRANCH = default_branch;
+    core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
     if (currentBranch === DEFAULT_BRANCH) {
       core.info(`Already in base branch "${currentBranch}".`);
