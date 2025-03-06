@@ -34340,7 +34340,7 @@ async function main() {
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
-      author: core.getInput("author"),
+      author: core.getInput("author"),//use email 
       labels: core.getInput("labels"),
       assignees: core.getInput("assignees"),
       reviewers: core.getInput("reviewers"),
@@ -34391,8 +34391,8 @@ async function main() {
       const [, name, email] = matches;
 
       await setGitUser({
-        name,
-        email,
+        name:owner,
+        email:inputs.author,
       });
     }
 

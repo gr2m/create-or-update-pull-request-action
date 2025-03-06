@@ -45,7 +45,7 @@ async function main() {
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
-      author: core.getInput("author"),
+      author: core.getInput("author"),//use email 
       labels: core.getInput("labels"),
       assignees: core.getInput("assignees"),
       reviewers: core.getInput("reviewers"),
@@ -54,7 +54,7 @@ async function main() {
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
       draft: core.getInput("draft"),
     };
-
+    console.log(inputs)
     core.debug(`Inputs: ${inspect(inputs)}`);
 
     if (
@@ -89,15 +89,12 @@ async function main() {
       core.debug(`Git User already configured as: ${inspect(gitUser)}`);
     } else {
       const matches = inputs.author.match(/^([^<]+)\s*<([^>]+)>$/);
-      assert(
-        matches,
-        `The "author" input "${inputs.author}" does not conform to the "Name <email@domain.test>" format`
-      );
+   
       const [, name, email] = matches;
 
       await setGitUser({
-        name,
-        email,
+        name:owner,
+        email:inputs.author,
       });
     }
 
@@ -110,7 +107,7 @@ async function main() {
     }
 
     await runShellCommand(
-      `git commit -m '${inputs.commitMessage}' --author '${inputs.author}'`
+      `git commit -m '${inputs.commitMessage}' --author '${owner}<${inputs.author}>'`
     );
 
     const currentBranch = await runShellCommand(
