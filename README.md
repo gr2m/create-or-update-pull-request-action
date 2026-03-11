@@ -13,6 +13,11 @@ on:
     # https://crontab.guru/every-night-at-midnight
     - cron: "0 0 * * *"
 
+# permissions can also be applied at job level
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update_routes:
     runs-on: ubuntu-latest
