@@ -61,5 +61,5 @@ outputs:
     description: "'updated', 'created', 'unchanged' based if the PR was created, updated or nothing happened"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"

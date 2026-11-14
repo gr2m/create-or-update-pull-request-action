@@ -1,9 +1,9 @@
-const assert = require("assert");
-const { inspect } = require("util");
+import assert from "node:assert";
+import { inspect } from "node:util";
 
-const { command } = require("execa");
-const core = require("@actions/core");
-const { Octokit } = require("@octokit/core");
+import { execa } from "execa";
+import * as core from "@actions/core";
+import { Octokit } from "@octokit/core";
 
 const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
   .toString(36)
@@ -43,6 +43,7 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
+      head: core.getInput("head"),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
@@ -130,7 +131,7 @@ async function main() {
     const DEFAULT_BRANCH = default_branch;
     core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
-    if (currentBranch === DEFAULT_BRANCH) {
+    if (currentBranch === DEFAULT_BRANCH && inputs.head) {
       core.info(`Already in base branch "${currentBranch}".`);
     } else {
       core.debug(`rebase all local changes on base branch`);
@@ -185,7 +186,7 @@ async function main() {
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
-      base: DEFAULT_BRANCH,
+      base: inputs.head || DEFAULT_BRANCH,
       draft: inputs.draft === "true",
     });
 
@@ -385,7 +386,7 @@ async function checkOutRemoteBranch(branch) {
 async function runShellCommand(commandString) {
   core.debug(`$ ${commandString}`);
   try {
-    const { stdout, stderr } = await command(commandString, { shell: true });
+    const { stdout, stderr } = await execa(commandString, { shell: true });
     const output = [stdout, stderr].filter(Boolean).join("\n");
     core.debug(output);
     return output;
