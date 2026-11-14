@@ -47,6 +47,7 @@ async function main() {
       title: core.getInput("title"),
       body: core.getInput("body"),
       branch: core.getInput("branch").replace(/^refs\/heads\//, ""),
+      head: core.getInput("head"),
       path: core.getInput("path"),
       commitMessage: core.getInput("commit-message"),
       author: core.getInput("author"),
@@ -129,7 +130,7 @@ async function main() {
       `git rev-parse --abbrev-ref HEAD`
     );
 
-    if (currentBranch === DEFAULT_BRANCH) {
+    if (currentBranch === DEFAULT_BRANCH && inputs.head) {
       core.info(`Already in base branch "${currentBranch}".`);
     } else {
       core.debug(`rebase all local changes on base branch`);
@@ -184,7 +185,7 @@ async function main() {
       title: inputs.title,
       body: inputs.body,
       head: inputs.branch,
-      base: DEFAULT_BRANCH,
+      base: inputs.head || DEFAULT_BRANCH,
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
