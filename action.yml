@@ -49,10 +49,6 @@ inputs:
     description: "Set to true if you want the title and body to be updated for an existing pull request"
     default: "false"
     required: false
-  draft:
-    description: "Create the pull request as a draft"
-    default: "false"
-    required: false
 
 outputs:
   pull-request-number:
