@@ -1,9 +1,9 @@
-const assert = require("assert");
-const { inspect } = require("util");
+import assert from "node:assert";
+import { inspect } from "node:util";
 
-const { command } = require("execa");
-const core = require("@actions/core");
-const { Octokit } = require("@octokit/core");
+import { execa } from "execa";
+import * as core from "@actions/core";
+import { Octokit } from "@octokit/core";
 
 const TEMPORARY_BRANCH_NAME = `tmp-create-or-update-pull-request-action-${Math.random()
   .toString(36)
@@ -384,7 +384,7 @@ async function checkOutRemoteBranch(branch) {
 async function runShellCommand(commandString) {
   core.debug(`$ ${commandString}`);
   try {
-    const { stdout, stderr } = await command(commandString, { shell: true });
+    const { stdout, stderr } = await execa(commandString, { shell: true });
     const output = [stdout, stderr].filter(Boolean).join("\n");
     core.debug(output);
     return output;
