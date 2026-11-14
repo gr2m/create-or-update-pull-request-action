@@ -15,7 +15,7 @@ async function main() {
   if (!process.env.GITHUB_TOKEN) {
     core.setFailed(
       `GITHUB_TOKEN is not configured. Make sure you made it available to your action
-  
+
   uses: gr2m/create-or-update-pull-request-action@master
   env:
     GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
@@ -36,10 +36,6 @@ async function main() {
     return;
   }
 
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
-  });
-
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
   try {
@@ -57,6 +53,7 @@ async function main() {
       team_reviewers: core.getInput("team_reviewers"),
       autoMerge: core.getInput("auto-merge"),
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
+      draft: core.getInput("draft"),
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -70,15 +67,6 @@ async function main() {
       );
       process.exit(1);
     }
-
-    const {
-      data: { default_branch },
-    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
-      owner,
-      repo,
-    });
-    const DEFAULT_BRANCH = default_branch;
-    core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
     const { hasChanges } = await getLocalChanges(inputs.path);
 
@@ -129,6 +117,19 @@ async function main() {
     const currentBranch = await runShellCommand(
       `git rev-parse --abbrev-ref HEAD`
     );
+
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    });
+
+    const {
+      data: { default_branch },
+    } = await octokit.request(`GET /repos/{owner}/{repo}`, {
+      owner,
+      repo,
+    });
+    const DEFAULT_BRANCH = default_branch;
+    core.debug(`DEFAULT_BRANCH: ${DEFAULT_BRANCH}`);
 
     if (currentBranch === DEFAULT_BRANCH && inputs.head) {
       core.info(`Already in base branch "${currentBranch}".`);
@@ -186,6 +187,7 @@ async function main() {
       body: inputs.body,
       head: inputs.branch,
       base: inputs.head || DEFAULT_BRANCH,
+      draft: inputs.draft === "true",
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
@@ -224,7 +226,7 @@ async function main() {
       core.info(`Assignees added: ${assignees.join(", ")}`);
       core.debug(inspect(data));
     }
-  
+
     if (inputs.reviewers || inputs.team_reviewers) {
       let params = {
         owner,
@@ -234,8 +236,8 @@ async function main() {
       let reviewers = null;
       let team_reviewers = null;
 
-      if(inputs.reviewers) { 
-        core.debug(`Adding reviewers: ${inputs.reviewers}`) 
+      if(inputs.reviewers) {
+        core.debug(`Adding reviewers: ${inputs.reviewers}`)
         reviewers = (inputs.reviewers || "").trim().split(/\s*,\s*/);
 
         params = {
@@ -245,7 +247,7 @@ async function main() {
       };
 
       if(inputs.team_reviewers) {
-        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`) 
+        core.debug(`Adding team reviewers: ${inputs.team_reviewers}`)
         team_reviewers = (inputs.team_reviewers || "").trim().split(/\s*,\s*/);
 
         params = {

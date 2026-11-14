@@ -9,6 +9,40 @@
     "build": "ncc build index.js -o dist"
   },
   "repository": "github:gr2m/create-or-update-pull-request-action",
+  "release": {
+    "branches": [
+      "+([0-9]).x",
+      "master",
+      "next"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github",
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false
+        }
+      ],
+      [
+        "@semantic-release/exec",
+        {
+          "publishCmd": "npm run build"
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "dist/index.js"
+          ],
+          "message": "build(release): compiled action for ${nextRelease.version}\n\n[skip ci]"
+        }
+      ]
+    ]
+  },
   "keywords": [
     "github-action"
   ],
@@ -20,6 +54,7 @@
     "execa": "^10.2.1"
   },
   "devDependencies": {
+    "@semantic-release/exec": "^7.1.0",
     "@vercel/ncc": "^0.45.0"
   }
 }
