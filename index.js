@@ -57,6 +57,7 @@ async function main() {
       team_reviewers: core.getInput("team_reviewers"),
       autoMerge: core.getInput("auto-merge"),
       updatePRTitleAndBody: core.getInput("update-pull-request-title-and-body"),
+      draft: core.getInput("draft")
     };
 
     core.debug(`Inputs: ${inspect(inputs)}`);
@@ -170,6 +171,7 @@ async function main() {
           number: prInfo.number,
           title: inputs.title,
           body: inputs.body,
+          draft: inputs.draft === "true"
         });
         core.info(`PR title and body are updated`);
         return;
@@ -186,6 +188,7 @@ async function main() {
       body: inputs.body,
       head: inputs.branch,
       base: inputs.head || DEFAULT_BRANCH,
+      draft: inputs.draft === "true"
     });
 
     core.info(`Pull request created: ${html_url} (#${number})`);
