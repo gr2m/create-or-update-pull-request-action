@@ -13,10 +13,10 @@ jobs:
         with:
           app-id: ${{ vars.GR2M_SEMANTIC_RELEASE_ID }}
           private-key: ${{ secrets.GR2M_SEMANTIC_RELEASE_PRIVATE_KEY }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: lts/*
           cache: npm
@@ -34,12 +34,12 @@ jobs:
       - run: >-
           git push -f
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          HEAD:refs/heads/v1
+          HEAD:refs/heads/v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: >-
           git push -f
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          HEAD:refs/heads/v1.x
+          HEAD:refs/heads/v2.x
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
